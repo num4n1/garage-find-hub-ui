@@ -23,9 +23,9 @@ const Header = () => {
             <Link to="/about" className="text-gray-600 hover:text-blue-600 font-medium transition-colors">
               About
             </Link>
-            <a href="#" className="text-gray-600 hover:text-blue-600 font-medium transition-colors">
+            <Link to="/contact" className="text-gray-600 hover:text-blue-600 font-medium transition-colors">
               Contact
-            </a>
+            </Link>
           </nav>
 
           {/* Contact Info */}

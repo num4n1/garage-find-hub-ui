@@ -72,7 +72,7 @@ const HeroSection = ({ onVerificationComplete, isVerified }: HeroSectionProps) =
   }
 
   return (
-    <div className="bg-gradient-to-r from-blue-600 to-blue-700 text-white py-16">
+    <div className="bg-gradient-to-r from-blue-600 to-blue-700 text-white min-h-screen flex items-center justify-center">
       <div className="max-w-2xl mx-auto px-4 text-center">
         <Shield className="h-16 w-16 mx-auto mb-6 text-blue-200" />
         <h1 className="text-4xl md:text-5xl font-bold mb-6">

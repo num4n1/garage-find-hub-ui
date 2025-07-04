@@ -27,7 +27,7 @@ const Contact = () => {
                 </div>
                 <div>
                   <h3 className="font-semibold text-blue-900">24/7 Support</h3>
-                  <p className="text-gray-600">+1 (555) 123-4567</p>
+                  <p className="text-gray-600">+971 (56) 862-2370</p>
                 </div>
               </div>
 
@@ -79,7 +79,7 @@ const Contact = () => {
               
               <div>
                 <Label htmlFor="phone">Phone Number</Label>
-                <Input id="phone" type="tel" placeholder="+1 (555) 123-4567" className="mt-1" />
+                <Input id="phone" type="tel" placeholder="+971-5X-XXX-XXXX" className="mt-1" />
               </div>
               
               <div>

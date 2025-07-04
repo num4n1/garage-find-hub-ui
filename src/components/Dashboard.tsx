@@ -10,7 +10,7 @@ const mockGarages = {
     {
       id: "1",
       name: "Crystal Clear Tinting",
-      description: "Professional window tinting with lifetime warranty test. Specializing in ceramic and carbon films.",
+      description: "Professional window tinting with lifetime warranty. Specializing in ceramic and carbon films.",
       rating: 4.8,
       location: "Downtown Auto District",
       services: ["Window Tinting", "Paint Protection", "Car Detailing"],

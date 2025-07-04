@@ -93,7 +93,7 @@ const HeroSection = ({ onVerificationComplete, isVerified }: HeroSectionProps) =
                   <Phone className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
                   <Input
                     type="tel"
-                    placeholder="+1 (555) 123-4567"
+                    placeholder="+971 5X XXX XXXX"
                     value={phoneNumber}
                     onChange={(e) => setPhoneNumber(e.target.value)}
                     className="pl-10 text-lg"

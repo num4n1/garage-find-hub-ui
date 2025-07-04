@@ -62,11 +62,11 @@ const About = () => {
           <div className="flex justify-center lg:justify-end">
             <div className="relative">
               <img 
-                src="https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80"
-                alt="Professional garage workspace"
-                className="rounded-2xl shadow-2xl w-full max-w-md h-80 object-cover"
+                src="/assets/Nissan-Patrol-Image-AboutPage.png"
+                alt="GarageFinder map icon"
+                className="w-full max-w-md h-200 object-cover"
               />
-              <div className="absolute inset-0 bg-blue-600 bg-opacity-10 rounded-2xl"></div>
+              <div className="absolute"></div>
             </div>
           </div>
         </div>

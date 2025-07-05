@@ -13,7 +13,7 @@ interface Garage {
   location: string;
   services: string[];
   whatsapp: string;
-  specialties: string[];
+  specialities: string[];
 }
 
 interface GarageCardProps {
@@ -66,11 +66,11 @@ const GarageCard = ({ garage }: GarageCardProps) => {
           {garage.description}
         </p>
 
-        {/* Specialties */}
+        {/* specialities */}
         <div>
-          <h4 className="text-sm font-semibold text-blue-800 mb-2">Specialties:</h4>
+          <h4 className="text-sm font-semibold text-blue-800 mb-2">specialities:</h4>
           <div className="flex flex-wrap gap-1">
-            {garage.specialties.map((specialty, index) => (
+            {(garage.specialities || []).map((specialty, index) => (
               <Badge key={index} variant="secondary" className="text-xs bg-blue-100 text-blue-700">
                 {specialty}
               </Badge>
@@ -82,7 +82,7 @@ const GarageCard = ({ garage }: GarageCardProps) => {
         <div>
           <h4 className="text-sm font-semibold text-blue-800 mb-2">All Services:</h4>
           <div className="flex flex-wrap gap-1">
-            {garage.services.map((service, index) => (
+          {(garage.services || []).map((service, index) => (
               <Badge key={index} variant="outline" className="text-xs border-blue-200 text-blue-600">
                 {service}
               </Badge>

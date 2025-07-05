@@ -16,14 +16,14 @@ import {
 } from "lucide-react";
 
 const services = [
-  { id: "tinting", name: "Window Tinting", icon: Shield },
-  { id: "wrapping", name: "Car Wrapping", icon: Layers },
-  { id: "detailing", name: "Car Detailing", icon: Sparkles },
-  { id: "painting", name: "Auto Painting", icon: Paintbrush },
-  { id: "mechanical", name: "Mechanical", icon: Wrench },
-  { id: "bodywork", name: "Body Work", icon: Car },
-  { id: "electrical", name: "Electrical", icon: Zap },
-  { id: "tuning", name: "Performance", icon: Gauge },
+  { id: "Detailing", name: "Car Detailing", icon: Sparkles },
+  { id: "Wrapping", name: "Car Wrapping", icon: Layers },
+  { id: "Painting", name: "Auto Painting", icon: Paintbrush },
+  { id: "Mechanical", name: "Mechanical", icon: Wrench },
+  { id: "Bodywork", name: "Body Work", icon: Car },
+  { id: "Electrical", name: "Electrical", icon: Zap },
+  { id: "Performance", name: "Performance", icon: Gauge },
+  { id: "Tinting", name: "Window Tinting", icon: Shield },
 ];
 
 interface ServiceTabsProps {

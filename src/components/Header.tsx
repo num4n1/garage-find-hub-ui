@@ -1,8 +1,15 @@
 
 import { Phone, MapPin } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useLocation  } from "react-router-dom";
 
 const Header = () => {
+  const location = useLocation();
+
+  const linkClasses = (path: string) =>
+    location.pathname === path
+      ? "text-blue-600 font-medium"
+      : "text-gray-600 hover:text-blue-600 font-medium";
+  
   return (
     <header className="bg-white shadow-sm border-b border-blue-100">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -17,13 +24,13 @@ const Header = () => {
 
           {/* Navigation */}
           <nav className="hidden md:flex space-x-8">
-            <Link to="/" className="text-blue-600 hover:text-blue-800 font-medium transition-colors">
+            <Link to="/" className={linkClasses("/")}>
               Home
             </Link>
-            <Link to="/about" className="text-gray-600 hover:text-blue-600 font-medium transition-colors">
+            <Link to="/about" className={linkClasses("/about")}>
               About
             </Link>
-            <Link to="/contact" className="text-gray-600 hover:text-blue-600 font-medium transition-colors">
+            <Link to="/contact" className={linkClasses("/contact")}>
               Contact
             </Link>
           </nav>

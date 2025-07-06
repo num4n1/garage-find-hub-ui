@@ -24,10 +24,15 @@ const GarageCard = ({ garage }: GarageCardProps) => {
   const { toast } = useToast();
 
   const handleWhatsAppContact = () => {
-    const message = encodeURIComponent(`Hi! I found your garage on GarageFinder and I'm interested in your services. Could you please provide more information?`);
-    window.open(`https://wa.me/${garage.whatsapp}?text=${message}`, '_blank');
-    
-    // Log the contact attempt
+    const intro = `Hi! I found your garage on GarageFinder and I'm interested in your services.`;
+    const subject = `GarageFinder Inquiry`; // This can be fixed as a hardcoded subject
+    const userMessage = prompt("Enter your message or question for the garage:");
+  
+    if (userMessage === null) return; // User cancelled
+  
+    const fullMessage = encodeURIComponent(`${intro}\n\nSubject: ${subject}\n\n${userMessage}`);
+    window.open(`https://wa.me/${garage.whatsapp}?text=${fullMessage}`, '_blank');
+  
     console.log(`User contacted ${garage.name} via WhatsApp`);
     toast({
       title: "Opening WhatsApp",

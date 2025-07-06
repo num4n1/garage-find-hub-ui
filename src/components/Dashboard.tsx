@@ -5,6 +5,8 @@ import HeroSection from "./HeroSection";
 import ServiceTabs from "./ServiceTabs";
 import GarageCard from "./GarageCard";
 import { fetchGaragesByService } from "@/lib/fetchGaragesByService";
+import { onAuthStateChanged } from "firebase/auth";
+import { auth } from "@/lib/firebase";
 
 // // Mock data for garages
 // const mockGarages = {
@@ -198,31 +200,39 @@ const Dashboard = () => {
   const [selectedService, setSelectedService] = useState("Detailing");
   const [garages, setGarages] = useState([]);
 
-  const handleVerificationComplete = () => {
-    setIsVerified(true);
-  };
+  // Keep user signed in across navigation
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        setIsVerified(true);
+      } else {
+        setIsVerified(false);
+      }
+    });
+    return () => unsubscribe();
+  }, []);
 
+  // Fetch garages whenever service changes and user is verified
   useEffect(() => {
     if (isVerified) {
       fetchGaragesByService(selectedService).then(setGarages);
     }
   }, [selectedService, isVerified]);
-  
 
   return (
     <div className="min-h-screen">
       <HeroSection 
-        onVerificationComplete={handleVerificationComplete}
+        onVerificationComplete={() => setIsVerified(true)}
         isVerified={isVerified}
       />
-      
+
       {isVerified && (
         <>
           <ServiceTabs 
             selectedService={selectedService}
             onServiceSelect={setSelectedService}
           />
-          
+
           <div className="py-8 bg-gray-50">
             <div className="max-w-7xl mx-auto px-4">
               <div className="text-center mb-8">
@@ -233,13 +243,13 @@ const Dashboard = () => {
                   Contact garages directly via WhatsApp or phone
                 </p>
               </div>
-              
+
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                 {garages.map((garage) => (
                   <GarageCard key={garage.id} garage={garage} />
                 ))}
               </div>
-              
+
               {garages.length === 0 && (
                 <div className="text-center py-12">
                   <p className="text-gray-500 text-lg">
@@ -256,3 +266,4 @@ const Dashboard = () => {
 };
 
 export default Dashboard;
+

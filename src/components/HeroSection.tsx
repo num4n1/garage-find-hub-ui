@@ -1,57 +1,139 @@
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Shield, Phone } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { auth } from "@/lib/firebase";
+
+declare global {
+  interface Window {
+    recaptchaVerifier: import("firebase/auth").RecaptchaVerifier;
+  }
+}
+
+import {
+  RecaptchaVerifier,
+  signInWithPhoneNumber,
+  ConfirmationResult,
+} from "firebase/auth";
 
 interface HeroSectionProps {
   onVerificationComplete: () => void;
   isVerified: boolean;
 }
 
+const setupRecaptcha = () => {
+  window.recaptchaVerifier = new RecaptchaVerifier(auth, "recaptcha-container", {
+    size: "invisible", // or "normal" for visible box
+    callback: (response: any) => {
+      // reCAPTCHA solved
+    },
+    "expired-callback": () => {
+      // Handle expiration
+    },
+  });
+};
+
 const HeroSection = ({ onVerificationComplete, isVerified }: HeroSectionProps) => {
   const [phoneNumber, setPhoneNumber] = useState("");
   const [verificationCode, setVerificationCode] = useState("");
+  const [confirmationResult, setConfirmationResult] = useState<ConfirmationResult | null>(null);
+  const [isSending, setIsSending] = useState(false);
   const [isVerifying, setIsVerifying] = useState(false);
   const [showCodeInput, setShowCodeInput] = useState(false);
+  const recaptchaRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
 
-  const handleSendCode = () => {
-    if (phoneNumber.length < 10) {
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (!window.recaptchaVerifier && document.getElementById("recaptcha-container")) {
+        window.recaptchaVerifier = new RecaptchaVerifier(
+          auth,
+          "recaptcha-container",
+          {
+            size: "invisible",
+            callback: () => {},
+            "expired-callback": () => {},
+          }
+        );
+        clearInterval(interval); // stop polling
+      }
+    }, 100); // poll every 100ms
+  }, []);
+  
+
+  const handleSendCode = async () => {
+    if (!/^\d{10,15}$/.test(phoneNumber)) {
       toast({
         title: "Invalid Phone Number",
-        description: "Please enter a valid phone number",
+        description: "Enter a valid number with country code (e.g. 971507199103)",
         variant: "destructive",
       });
       return;
     }
-    
-    setIsVerifying(true);
-    // Simulate SMS sending
-    setTimeout(() => {
-      setShowCodeInput(true);
-      setIsVerifying(false);
-      toast({
-        title: "SMS Sent!",
-        description: "Please check your phone for the verification code",
-      });
-    }, 1500);
-  };
 
-  const handleVerifyCode = () => {
-    if (verificationCode === "1234" || verificationCode.length === 4) {
-      onVerificationComplete();
-      toast({
-        title: "Verified!",
-        description: "Welcome to GarageFinder. You can now browse services.",
-      });
-    } else {
+    setIsVerifying(true);
+
+    try {
+    if (!window.recaptchaVerifier) {
+      window.recaptchaVerifier = new RecaptchaVerifier(
+        auth,
+        "recaptcha-container",
+        { size: "invisible" }
+      );
+    }
+
+    const formattedNumber = `+${phoneNumber}`; // Prepend + for Firebase
+    const confirmation = await signInWithPhoneNumber(
+      auth,
+      formattedNumber,
+      window.recaptchaVerifier
+    );
+
+    setConfirmationResult(confirmation);
+    setShowCodeInput(true);
+    toast({
+      title: "Code Sent!",
+      description: `SMS sent to ${formattedNumber}`,
+    });
+  } catch (error: any) {
+    toast({
+      title: "Failed to Send Code",
+      description: error.message,
+      variant: "destructive",
+    });
+  } finally {
+    setIsVerifying(false);
+  }
+};
+
+  const handleVerifyCode = async () => {
+    if (!confirmationResult || verificationCode.length !== 6) {
       toast({
         title: "Invalid Code",
-        description: "Please enter the correct verification code",
+        description: "Enter the 6-digit code sent to your phone",
         variant: "destructive",
       });
+      return;
+    }
+
+    setIsVerifying(true);
+    try {
+      await confirmationResult.confirm(verificationCode);
+      onVerificationComplete();
+      toast({
+        title: "Verified",
+        description: "You can now browse garages.",
+      });
+    } catch (err) {
+      toast({
+        title: "Incorrect Code",
+        description: "Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsVerifying(false);
     }
   };
 
@@ -79,65 +161,41 @@ const HeroSection = ({ onVerificationComplete, isVerified }: HeroSectionProps) =
           Welcome to GarageFinder
         </h1>
         <p className="text-xl text-blue-100 mb-8">
-          Verify your phone number to access our network of trusted local garages
+          Verify your phone number to access trusted garages
         </p>
 
         <div className="bg-white rounded-lg shadow-xl p-8 text-gray-900 max-w-md mx-auto">
-          {!showCodeInput ? (
+          {!confirmationResult ? (
             <>
-              <div className="mb-6">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Phone Number
-                </label>
-                <div className="relative">
-                  <Phone className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
-                  <Input
-                    type="tel"
-                    placeholder="+971 5X XXX XXXX"
-                    value={phoneNumber}
-                    onChange={(e) => setPhoneNumber(e.target.value)}
-                    className="pl-10 text-lg"
-                  />
-                </div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Phone Number</label>
+              <div className="relative mb-6">
+                <Phone className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
+                <Input
+                  type="tel"
+                  placeholder="+9715XXXXXXXX"
+                  value={phoneNumber}
+                  onChange={(e) => setPhoneNumber(e.target.value)}
+                  className="pl-10 text-lg"
+                />
               </div>
-              <Button 
-                onClick={handleSendCode}
-                disabled={isVerifying}
-                className="w-full bg-blue-600 hover:bg-blue-700 text-lg py-3"
-              >
-                {isVerifying ? "Sending..." : "Send Verification Code"}
+              <div ref={recaptchaRef} id="recaptcha-container" className="mb-4"></div>
+              <Button onClick={handleSendCode} disabled={isSending} className="w-full bg-blue-600 hover:bg-blue-700 text-lg py-3">
+                {isSending ? "Sending..." : "Send Verification Code"}
               </Button>
             </>
           ) : (
             <>
-              <div className="mb-6">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Verification Code
-                </label>
-                <Input
-                  type="text"
-                  placeholder="Enter 4-digit code"
-                  value={verificationCode}
-                  onChange={(e) => setVerificationCode(e.target.value)}
-                  className="text-center text-lg tracking-widest"
-                  maxLength={4}
-                />
-                <p className="text-sm text-gray-500 mt-2">
-                  Code sent to {phoneNumber}
-                </p>
-              </div>
-              <Button 
-                onClick={handleVerifyCode}
-                className="w-full bg-blue-600 hover:bg-blue-700 text-lg py-3"
-              >
-                Verify & Continue
-              </Button>
-              <Button 
-                variant="ghost" 
-                onClick={() => setShowCodeInput(false)}
-                className="w-full mt-2 text-blue-600"
-              >
-                Change Phone Number
+              <label className="block text-sm font-medium text-gray-700 mb-2">Verification Code</label>
+              <Input
+                type="text"
+                placeholder="Enter 6-digit code"
+                value={verificationCode}
+                onChange={(e) => setVerificationCode(e.target.value)}
+                className="text-center text-lg tracking-widest mb-4"
+                maxLength={6}
+              />
+              <Button onClick={handleVerifyCode} disabled={isVerifying} className="w-full bg-blue-600 hover:bg-blue-700 text-lg py-3">
+                {isVerifying ? "Verifying..." : "Verify & Continue"}
               </Button>
             </>
           )}

@@ -46,7 +46,7 @@ const GarageCard = ({ garage }: GarageCardProps) => {
   };
 
   return (
-    <Card className="hover:shadow-lg transition-all duration-300 border-2 hover:border-blue-300 bg-white">
+    <Card className="hover:shadow-lg transition-all duration-300 border-2 hover:border-blue-300 bg-white h-full flex flex-col">
       <CardHeader className="pb-3">
         <div className="flex justify-between items-start">
           <CardTitle className="text-lg font-bold text-blue-900">
@@ -66,7 +66,7 @@ const GarageCard = ({ garage }: GarageCardProps) => {
         </div>
       </CardHeader>
 
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-4 flex-1 flex flex-col">
         <p className="text-gray-700 text-sm leading-relaxed">
           {garage.description}
         </p>
@@ -84,7 +84,7 @@ const GarageCard = ({ garage }: GarageCardProps) => {
         </div>
 
         {/* All Services */}
-        <div>
+        <div className="flex-1">
           <h4 className="text-sm font-semibold text-blue-800 mb-2">All Services:</h4>
           <div className="flex flex-wrap gap-1">
           {(garage.services || []).map((service, index) => (
@@ -96,7 +96,7 @@ const GarageCard = ({ garage }: GarageCardProps) => {
         </div>
 
         {/* Contact Buttons */}
-        <div className="flex space-x-2 pt-3">
+        <div className="flex space-x-2 pt-3 mt-auto">
           <Button 
             onClick={handleWhatsAppContact}
             className="flex-1 bg-green-600 hover:bg-green-700 text-white"

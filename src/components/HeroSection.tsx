@@ -1,4 +1,3 @@
-
 import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -24,21 +23,29 @@ interface HeroSectionProps {
 }
 
 const setupRecaptcha = () => {
-  window.recaptchaVerifier = new RecaptchaVerifier(auth, "recaptcha-container", {
-    size: "invisible", // or "normal" for visible box
-    callback: (response: any) => {
-      // reCAPTCHA solved
-    },
-    "expired-callback": () => {
-      // Handle expiration
-    },
-  });
+  window.recaptchaVerifier = new RecaptchaVerifier(
+    auth,
+    "recaptcha-container",
+    {
+      size: "invisible", // or "normal" for visible box
+      callback: (response: any) => {
+        // reCAPTCHA solved
+      },
+      "expired-callback": () => {
+        // Handle expiration
+      },
+    }
+  );
 };
 
-const HeroSection = ({ onVerificationComplete, isVerified }: HeroSectionProps) => {
+const HeroSection = ({
+  onVerificationComplete,
+  isVerified,
+}: HeroSectionProps) => {
   const [phoneNumber, setPhoneNumber] = useState("");
   const [verificationCode, setVerificationCode] = useState("");
-  const [confirmationResult, setConfirmationResult] = useState<ConfirmationResult | null>(null);
+  const [confirmationResult, setConfirmationResult] =
+    useState<ConfirmationResult | null>(null);
   const [isSending, setIsSending] = useState(false);
   const [isVerifying, setIsVerifying] = useState(false);
   const [showCodeInput, setShowCodeInput] = useState(false);
@@ -47,7 +54,10 @@ const HeroSection = ({ onVerificationComplete, isVerified }: HeroSectionProps) =
 
   useEffect(() => {
     const interval = setInterval(() => {
-      if (!window.recaptchaVerifier && document.getElementById("recaptcha-container")) {
+      if (
+        !window.recaptchaVerifier &&
+        document.getElementById("recaptcha-container")
+      ) {
         window.recaptchaVerifier = new RecaptchaVerifier(
           auth,
           "recaptcha-container",
@@ -61,13 +71,13 @@ const HeroSection = ({ onVerificationComplete, isVerified }: HeroSectionProps) =
       }
     }, 100); // poll every 100ms
   }, []);
-  
 
   const handleSendCode = async () => {
     if (!/^\d{10,15}$/.test(phoneNumber)) {
       toast({
         title: "Invalid Phone Number",
-        description: "Enter a valid number with country code (e.g. 971507199103)",
+        description:
+          "Enter a valid number with country code (e.g. 971507199103)",
         variant: "destructive",
       });
       return;
@@ -76,37 +86,37 @@ const HeroSection = ({ onVerificationComplete, isVerified }: HeroSectionProps) =
     setIsVerifying(true);
 
     try {
-    if (!window.recaptchaVerifier) {
-      window.recaptchaVerifier = new RecaptchaVerifier(
+      if (!window.recaptchaVerifier) {
+        window.recaptchaVerifier = new RecaptchaVerifier(
+          auth,
+          "recaptcha-container",
+          { size: "invisible" }
+        );
+      }
+
+      const formattedNumber = `+${phoneNumber}`; // Prepend + for Firebase
+      const confirmation = await signInWithPhoneNumber(
         auth,
-        "recaptcha-container",
-        { size: "invisible" }
+        formattedNumber,
+        window.recaptchaVerifier
       );
+
+      setConfirmationResult(confirmation);
+      setShowCodeInput(true);
+      toast({
+        title: "Code Sent!",
+        description: `SMS sent to ${formattedNumber}`,
+      });
+    } catch (error: any) {
+      toast({
+        title: "Failed to Send Code",
+        description: error.message,
+        variant: "destructive",
+      });
+    } finally {
+      setIsVerifying(false);
     }
-
-    const formattedNumber = `+${phoneNumber}`; // Prepend + for Firebase
-    const confirmation = await signInWithPhoneNumber(
-      auth,
-      formattedNumber,
-      window.recaptchaVerifier
-    );
-
-    setConfirmationResult(confirmation);
-    setShowCodeInput(true);
-    toast({
-      title: "Code Sent!",
-      description: `SMS sent to ${formattedNumber}`,
-    });
-  } catch (error: any) {
-    toast({
-      title: "Failed to Send Code",
-      description: error.message,
-      variant: "destructive",
-    });
-  } finally {
-    setIsVerifying(false);
-  }
-};
+  };
 
   const handleVerifyCode = async () => {
     if (!confirmationResult || verificationCode.length !== 6) {
@@ -141,7 +151,11 @@ const HeroSection = ({ onVerificationComplete, isVerified }: HeroSectionProps) =
     return (
       <div className="text-center py-8 bg-gradient-to-r from-blue-600 to-blue-700 text-white">
         <div className="max-w-4xl mx-auto px-4">
-          <Shield className="h-12 w-12 mx-auto mb-4 text-blue-200" />
+          <img
+  src="/assets/svgviewer-png-output.png"
+  alt="Logo"
+  className="h-16 w-16 mx-auto mb-6"
+/>
           <h1 className="text-3xl md:text-4xl font-bold mb-4">
             Find the Perfect Garage for Your Car
           </h1>
@@ -156,7 +170,11 @@ const HeroSection = ({ onVerificationComplete, isVerified }: HeroSectionProps) =
   return (
     <div className="bg-gradient-to-r from-blue-600 to-blue-700 text-white min-h-screen flex items-center justify-center">
       <div className="max-w-2xl mx-auto px-4 text-center">
-        <Shield className="h-16 w-16 mx-auto mb-6 text-blue-200" />
+        <img
+          src="/assets/svgviewer-png-output.png"
+          alt="Logo"
+          className="h-16 w-16 mx-auto mb-6"
+        />
         <h1 className="text-4xl md:text-5xl font-bold mb-6">
           Welcome to GarageFinder
         </h1>
@@ -167,7 +185,9 @@ const HeroSection = ({ onVerificationComplete, isVerified }: HeroSectionProps) =
         <div className="bg-white rounded-lg shadow-xl p-8 text-gray-900 max-w-md mx-auto">
           {!confirmationResult ? (
             <>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Phone Number</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Phone Number
+              </label>
               <div className="relative mb-6">
                 <Phone className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
                 <Input
@@ -178,14 +198,24 @@ const HeroSection = ({ onVerificationComplete, isVerified }: HeroSectionProps) =
                   className="pl-10 text-lg"
                 />
               </div>
-              <div ref={recaptchaRef} id="recaptcha-container" className="mb-4"></div>
-              <Button onClick={handleSendCode} disabled={isSending} className="w-full bg-blue-600 hover:bg-blue-700 text-lg py-3">
+              <div
+                ref={recaptchaRef}
+                id="recaptcha-container"
+                className="mb-4"
+              ></div>
+              <Button
+                onClick={handleSendCode}
+                disabled={isSending}
+                className="w-full bg-blue-600 hover:bg-blue-700 text-lg py-3"
+              >
                 {isSending ? "Sending..." : "Send Verification Code"}
               </Button>
             </>
           ) : (
             <>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Verification Code</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Verification Code
+              </label>
               <Input
                 type="text"
                 placeholder="Enter 6-digit code"
@@ -194,7 +224,11 @@ const HeroSection = ({ onVerificationComplete, isVerified }: HeroSectionProps) =
                 className="text-center text-lg tracking-widest mb-4"
                 maxLength={6}
               />
-              <Button onClick={handleVerifyCode} disabled={isVerifying} className="w-full bg-blue-600 hover:bg-blue-700 text-lg py-3">
+              <Button
+                onClick={handleVerifyCode}
+                disabled={isVerifying}
+                className="w-full bg-blue-600 hover:bg-blue-700 text-lg py-3"
+              >
                 {isVerifying ? "Verifying..." : "Verify & Continue"}
               </Button>
             </>

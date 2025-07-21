@@ -1,9 +1,10 @@
-
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { MapPin, Star, MessageCircle, Phone } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { db } from "@/lib/firebase";
+import { addDoc, collection, serverTimestamp } from "firebase/firestore";
 
 interface Garage {
   id: string;
@@ -18,31 +19,55 @@ interface Garage {
 
 interface GarageCardProps {
   garage: Garage;
+  service: string;
 }
 
-const GarageCard = ({ garage }: GarageCardProps) => {
+const GarageCard = ({ garage, service }: GarageCardProps) => {
   const { toast } = useToast();
+
+  const logGarageClick = async (type: "whatsapp" | "call") => {
+  try {
+    await addDoc(
+      collection(db, service, garage.id, "analytics"),  // 👈 now valid
+      {
+        type,
+        timestamp: serverTimestamp(),
+      }
+    );
+  } catch (err) {
+    console.error("Failed to log click:", err);
+  }
+};
+
 
   const handleWhatsAppContact = () => {
     const intro = `Hi! I found your garage on GarageFinder and I'm interested in your services.`;
-    const subject = `GarageFinder Inquiry`; // This can be fixed as a hardcoded subject
-    const userMessage = prompt("Enter your message or question for the garage:");
-  
-    if (userMessage === null) return; // User cancelled
-  
-    const fullMessage = encodeURIComponent(`${intro}\n\nSubject: ${subject}\n\n${userMessage}`);
-    window.open(`https://wa.me/${garage.whatsapp}?text=${fullMessage}`, '_blank');
-  
-    console.log(`User contacted ${garage.name} via WhatsApp`);
+    const subject = `GarageFinder Inquiry`;
+    const userMessage = prompt(
+      "Enter your message or question for the garage:"
+    );
+
+    if (userMessage === null) return;
+
+    const fullMessage = encodeURIComponent(
+      `${intro}\n\nSubject: ${subject}\n\n${userMessage}`
+    );
+    window.open(
+      `https://wa.me/${garage.whatsapp}?text=${fullMessage}`,
+      "_blank"
+    );
+
     toast({
       title: "Opening WhatsApp",
       description: `Connecting you with ${garage.name}`,
     });
+
+    logGarageClick("whatsapp");
   };
 
   const handlePhoneContact = () => {
-    window.open(`tel:${garage.whatsapp}`, '_self');
-    console.log(`User called ${garage.name}`);
+    window.open(`tel:${garage.whatsapp}`, "_self");
+    logGarageClick("call");
   };
 
   return (
@@ -59,7 +84,7 @@ const GarageCard = ({ garage }: GarageCardProps) => {
             </span>
           </div>
         </div>
-        
+
         <div className="flex items-center text-gray-600 text-sm">
           <MapPin className="h-4 w-4 mr-1" />
           {garage.location}
@@ -73,10 +98,16 @@ const GarageCard = ({ garage }: GarageCardProps) => {
 
         {/* specialities */}
         <div>
-          <h4 className="text-sm font-semibold text-blue-800 mb-2">specialities:</h4>
+          <h4 className="text-sm font-semibold text-blue-800 mb-2">
+            specialities:
+          </h4>
           <div className="flex flex-wrap gap-1">
             {(garage.specialities || []).map((specialty, index) => (
-              <Badge key={index} variant="secondary" className="text-xs bg-blue-100 text-blue-700">
+              <Badge
+                key={index}
+                variant="secondary"
+                className="text-xs bg-blue-100 text-blue-700"
+              >
                 {specialty}
               </Badge>
             ))}
@@ -85,10 +116,16 @@ const GarageCard = ({ garage }: GarageCardProps) => {
 
         {/* All Services */}
         <div className="flex-1">
-          <h4 className="text-sm font-semibold text-blue-800 mb-2">All Services:</h4>
+          <h4 className="text-sm font-semibold text-blue-800 mb-2">
+            All Services:
+          </h4>
           <div className="flex flex-wrap gap-1">
-          {(garage.services || []).map((service, index) => (
-              <Badge key={index} variant="outline" className="text-xs border-blue-200 text-blue-600">
+            {(garage.services || []).map((service, index) => (
+              <Badge
+                key={index}
+                variant="outline"
+                className="text-xs border-blue-200 text-blue-600"
+              >
                 {service}
               </Badge>
             ))}
@@ -97,16 +134,16 @@ const GarageCard = ({ garage }: GarageCardProps) => {
 
         {/* Contact Buttons */}
         <div className="flex space-x-2 pt-3 mt-auto">
-          <Button 
+          <Button
             onClick={handleWhatsAppContact}
             className="flex-1 bg-green-600 hover:bg-green-700 text-white"
           >
             <MessageCircle className="h-4 w-4 mr-2" />
             WhatsApp
           </Button>
-          <Button 
+          <Button
             onClick={handlePhoneContact}
-            variant="outline" 
+            variant="outline"
             className="flex-1 border-blue-300 text-blue-600 hover:bg-blue-50"
           >
             <Phone className="h-4 w-4 mr-2" />

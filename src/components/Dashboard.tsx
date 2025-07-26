@@ -46,7 +46,7 @@ const Dashboard = () => {
             onServiceSelect={setSelectedService}
           />
 
-          <div className="py-8 bg-gray-50">
+          <div id="garage-cards-section" className="py-8 bg-gray-50">
             <div className="max-w-7xl mx-auto px-4">
               <div className="text-center mb-8">
                 <h2 className="text-3xl font-bold text-blue-900 mb-2">

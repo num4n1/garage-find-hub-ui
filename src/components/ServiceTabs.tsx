@@ -32,6 +32,20 @@ interface ServiceTabsProps {
 }
 
 const ServiceTabs = ({ selectedService, onServiceSelect }: ServiceTabsProps) => {
+  const handleServiceSelect = (serviceId: string) => {
+    onServiceSelect(serviceId);
+    // Smooth scroll to garage cards section
+    setTimeout(() => {
+      const garageSection = document.getElementById('garage-cards-section');
+      if (garageSection) {
+        garageSection.scrollIntoView({ 
+          behavior: 'smooth',
+          block: 'start'
+        });
+      }
+    }, 100);
+  };
+
   return (
     <div className="bg-white shadow-sm border-b border-blue-100 py-6">
       <div className="max-w-7xl mx-auto px-4">
@@ -47,7 +61,7 @@ const ServiceTabs = ({ selectedService, onServiceSelect }: ServiceTabsProps) => 
               <Button
                 key={service.id}
                 variant={isSelected ? "default" : "outline"}
-                onClick={() => onServiceSelect(service.id)}
+                onClick={() => handleServiceSelect(service.id)}
                 className={`h-auto py-4 px-3 flex flex-col items-center space-y-2 transition-all duration-200 ${
                   isSelected 
                     ? "bg-blue-600 hover:bg-blue-700 text-white shadow-lg scale-105" 

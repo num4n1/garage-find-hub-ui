@@ -11,9 +11,6 @@ const About = () => {
           {/* Content Section */}
           <div className="space-y-6 order-2 lg:order-1">
             <div className="flex items-center space-x-3 mb-4">
-              <div className="bg-blue-600 p-2 rounded-lg">
-                <MapPin className="h-6 w-6 md:h-8 md:w-8 text-white" />
-              </div>
               <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold text-blue-900">About GarageFinder</h1>
             </div>
             
@@ -59,12 +56,12 @@ const About = () => {
           </div>
 
           {/* Image Section */}
-          <div className="flex justify-center lg:justify-end order-1 lg:order-2">
+          <div className="flex justify-center lg:justify-end order-2 lg:order-2">
             <div className="relative w-full max-w-sm md:max-w-md">
               <img 
                 src="/assets/Nissan-Patrol-Image-AboutPage.png"
                 alt="GarageFinder map icon"
-                className="w-full h-auto object-cover rounded-lg shadow-lg"
+                className="w-full h-auto object-cover rounded-lg "
               />
             </div>
           </div>

@@ -6,24 +6,24 @@ const About = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-blue-100">
       <Header />
-      <div className="flex items-center justify-center px-4" style={{ height: 'calc(100vh - 4rem)' }}>
-        <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+      <div className="px-4 py-8 md:py-16 lg:py-20">
+        <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-12 items-center">
           {/* Content Section */}
-          <div className="space-y-6">
-            <div className="hidden md:flex items-center space-x-3 mb-4">
+          <div className="space-y-6 order-2 lg:order-1">
+            <div className="flex items-center space-x-3 mb-4">
               <div className="bg-blue-600 p-2 rounded-lg">
-                <MapPin className="h-8 w-8 text-white" />
+                <MapPin className="h-6 w-6 md:h-8 md:w-8 text-white" />
               </div>
-              <h1 className="text-4xl font-bold text-blue-900">About GarageFinder</h1>
+              <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold text-blue-900">About GarageFinder</h1>
             </div>
             
-            <p className="text-lg text-gray-700 leading-relaxed">
+            <p className="text-base md:text-lg text-gray-700 leading-relaxed">
               GarageFinder is your trusted platform for discovering the best local car service garages. 
               We connect car owners with professional garages offering specialized services like tinting, 
               wrapping, detailing, painting, and more.
             </p>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-6">
               <div className="flex items-start space-x-3">
                 <Shield className="h-6 w-6 text-blue-600 mt-1 flex-shrink-0" />
                 <div>
@@ -59,14 +59,13 @@ const About = () => {
           </div>
 
           {/* Image Section */}
-          <div className="flex justify-center lg:justify-end">
-            <div className="relative">
+          <div className="flex justify-center lg:justify-end order-1 lg:order-2">
+            <div className="relative w-full max-w-sm md:max-w-md">
               <img 
                 src="/assets/Nissan-Patrol-Image-AboutPage.png"
                 alt="GarageFinder map icon"
-                className="w-full max-w-md h-200 object-cover"
+                className="w-full h-auto object-cover rounded-lg shadow-lg"
               />
-              <div className="absolute"></div>
             </div>
           </div>
         </div>

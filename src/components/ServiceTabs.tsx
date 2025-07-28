@@ -36,6 +36,7 @@ const ServiceTabs = ({ selectedService, onServiceSelect }: ServiceTabsProps) => 
     onServiceSelect(serviceId);
     // Smooth scroll to garage cards section
     setTimeout(() => {
+    if (window.matchMedia("(max-width: 768px)").matches) {  // mobile breakpoint
       const garageSection = document.getElementById('garage-cards-section');
       if (garageSection) {
         garageSection.scrollIntoView({ 
@@ -43,7 +44,8 @@ const ServiceTabs = ({ selectedService, onServiceSelect }: ServiceTabsProps) => 
           block: 'start'
         });
       }
-    }, 100);
+    }
+  }, 100);
   };
 
   return (

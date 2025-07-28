@@ -53,6 +53,21 @@ const HeroSection = ({
   const { toast } = useToast();
 
   useEffect(() => {
+  const handleKeyDown = (e: KeyboardEvent) => {
+    if (e.key === "Enter") {
+      if (!confirmationResult) {
+        handleSendCode();
+      } else {
+        handleVerifyCode();
+      }
+    }
+  };
+
+  window.addEventListener("keydown", handleKeyDown);
+  return () => window.removeEventListener("keydown", handleKeyDown);
+}, [confirmationResult, phoneNumber, verificationCode]);
+
+  useEffect(() => {
     const interval = setInterval(() => {
       if (
         !window.recaptchaVerifier &&

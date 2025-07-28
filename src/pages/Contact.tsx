@@ -9,11 +9,11 @@ const Contact = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-blue-100">
       <Header />
-      <div className="flex items-center justify-center px-4" style={{ height: 'calc(100vh - 4rem)' }}>
+      <div className="flex justify-center px-4 py-8 md:py-0">
         <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           {/* Contact Info Section */}
           <div className="space-y-8">
-            <div>
+            <div className="hidden md:block">
               <h1 className="text-4xl font-bold text-blue-900 mb-4">Get in Touch</h1>
               <p className="text-lg text-gray-700">
                 Have questions about GarageFinder? We're here to help you connect with the best local garages.

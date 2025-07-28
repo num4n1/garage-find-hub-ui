@@ -10,7 +10,7 @@ const About = () => {
         <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           {/* Content Section */}
           <div className="space-y-6">
-            <div className="flex items-center space-x-3 mb-4">
+            <div className="hidden md:flex items-center space-x-3 mb-4">
               <div className="bg-blue-600 p-2 rounded-lg">
                 <MapPin className="h-8 w-8 text-white" />
               </div>

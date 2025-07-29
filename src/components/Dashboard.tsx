@@ -10,7 +10,7 @@ import { auth } from "@/lib/firebase";
 
 const Dashboard = () => {
   const [isVerified, setIsVerified] = useState(false);
-  const [selectedService, setSelectedService] = useState("Detailing");
+  const [selectedService, setSelectedService] = useState("Mechanical");
   const [garages, setGarages] = useState([]);
 
   // Keep user signed in across navigation

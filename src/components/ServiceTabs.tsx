@@ -16,13 +16,13 @@ import {
 } from "lucide-react";
 
 const services = [
-  { id: "Detailing", name: "Car Detailing", icon: Sparkles },
-  { id: "Wrapping", name: "Car Wrapping", icon: Layers },
-  { id: "Painting", name: "Auto Painting", icon: Paintbrush },
   { id: "Mechanical", name: "Mechanical", icon: Wrench },
-  { id: "Bodywork", name: "Body Work", icon: Car },
+  { id: "Wrapping", name: "Car Wrapping", icon: Layers },
   { id: "Electrical", name: "Electrical", icon: Zap },
-  { id: "Performance", name: "Performance", icon: Gauge },
+  { id: "PPF", name: "PPF", icon: Car },
+  { id: "Painting", name: "Auto Painting", icon: Paintbrush },
+  { id: "Ceramic", name: "Ceramic", icon: Sparkles },
+  { id: "Upholstery", name: "Upholstery", icon: Gauge },
   { id: "Tinting", name: "Window Tinting", icon: Shield },
 ];
 

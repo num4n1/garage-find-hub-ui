@@ -11,11 +11,11 @@ const About = () => {
           {/* Content Section */}
           <div className="space-y-6 order-2 lg:order-1">
             <div className="flex items-center space-x-3 mb-4">
-              <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold text-blue-900">About GarageFinder</h1>
+              <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold text-blue-900">About YallaFinder</h1>
             </div>
             
             <p className="text-base md:text-lg text-gray-700 leading-relaxed">
-              GarageFinder is your trusted platform for discovering the best local car service garages. 
+              YallaFinder is your trusted platform for discovering the best local car service garages. 
               We connect car owners with professional garages offering specialized services like tinting, 
               wrapping, detailing, painting, and more.
             </p>
@@ -60,7 +60,7 @@ const About = () => {
             <div className="relative w-full max-w-sm md:max-w-md">
               <img 
                 src="/assets/Nissan-Patrol-Image-AboutPage.png"
-                alt="GarageFinder map icon"
+                alt="YallaFinder map icon"
                 className="w-full h-auto object-cover rounded-lg "
               />
             </div>

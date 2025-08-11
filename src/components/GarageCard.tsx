@@ -41,8 +41,8 @@ const GarageCard = ({ garage, service }: GarageCardProps) => {
 
 
   const handleWhatsAppContact = () => {
-    const intro = `Hi! I found your garage on GarageFinder and I'm interested in your services.`;
-    const subject = `GarageFinder Inquiry`;
+    const intro = `Hi! I found your garage on YallaFinder and I'm interested in your services.`;
+    const subject = `YallaFinder Inquiry`;
     const userMessage = prompt(
       "Enter your message or question for the garage:"
     );

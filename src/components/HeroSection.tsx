@@ -191,7 +191,7 @@ const HeroSection = ({
           className="h-16 w-16 mx-auto mb-6"
         />
         <h1 className="text-4xl md:text-5xl font-bold mb-6">
-          Welcome to GarageFinder
+          Welcome to YallaFinder
         </h1>
         <p className="text-xl text-blue-100 mb-8">
           Verify your phone number to access trusted garages
@@ -207,7 +207,7 @@ const HeroSection = ({
                 <Phone className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
                 <Input
                   type="tel"
-                  placeholder="+9715XXXXXXXX"
+                  placeholder="9715XXXXXXXX"
                   value={phoneNumber}
                   onChange={(e) => setPhoneNumber(e.target.value)}
                   className="pl-10 text-lg"

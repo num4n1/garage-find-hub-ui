@@ -16,7 +16,7 @@ const Contact = () => {
             <div className="text-center lg:text-left">
               <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold text-blue-900 mb-4">Get in Touch</h1>
               <p className="text-base md:text-lg text-gray-700">
-                Have questions about GarageFinder? We're here to help you connect with the best local garages.
+                Have questions about YallaFinder? We're here to help you connect with the best local garages.
               </p>
             </div>
 
@@ -37,7 +37,7 @@ const Contact = () => {
                 </div>
                 <div>
                   <h3 className="font-semibold text-blue-900 text-sm md:text-base">Email Us</h3>
-                  <p className="text-gray-600 text-sm md:text-base break-all">support@garagefinder.com</p>
+                  <p className="text-gray-600 text-sm md:text-base break-all">support@YallaFinder.com</p>
                 </div>
               </div>
 

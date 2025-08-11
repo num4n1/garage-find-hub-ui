@@ -22,7 +22,7 @@ const Header = () => {
             <div className="bg-blue-600 p-2 rounded-lg">
               <MapPin className="h-6 w-6 text-white" />
             </div>
-            <span className="text-xl font-bold text-blue-900">GarageFinder</span>
+            <span className="text-xl font-bold text-blue-900">YallaFinder</span>
           </Link>
 
           {/* Desktop Navigation */}

@@ -1,5 +1,5 @@
 
-import { MapPin, Shield, Users, Phone } from "lucide-react";
+import { MapPin, Shield, Users, Phone, ScanSearch } from "lucide-react";
 import Header from "@/components/Header";
 
 const About = () => {

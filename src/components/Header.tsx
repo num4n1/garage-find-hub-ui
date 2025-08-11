@@ -1,5 +1,5 @@
 
-import { Phone, MapPin, Menu } from "lucide-react";
+import { Phone, MapPin, Menu, ScanSearch } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -20,7 +20,7 @@ const Header = () => {
           {/* Logo */}
           <Link to="/" className="flex items-center space-x-2">
             <div className="bg-blue-600 p-2 rounded-lg">
-              <MapPin className="h-6 w-6 text-white" />
+              <ScanSearch className="h-6 w-6 text-white" />
             </div>
             <span className="text-xl font-bold text-blue-900">YallaFinder</span>
           </Link>

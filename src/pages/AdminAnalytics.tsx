@@ -1,152 +1,171 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import Header from "@/components/Header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
+  Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
+  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
 } from "recharts";
-import { Calendar, TrendingUp, Users, MousePointer } from "lucide-react";
+import { Calendar, TrendingUp, Users, MousePointer, RefreshCw, Download } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { db } from "@/lib/firebase";
-import {
-  collection,
-  getDocs,
-  query,
-  where,
-  Timestamp,
-} from "firebase/firestore";
+import { collection, getDocs, query, where, Timestamp, orderBy } from "firebase/firestore";
 
-interface AnalyticsData {
-  day: string;
-  clicks: number;
-}
+type Period = "week" | "month";
 
-interface Garage {
-  id: string;
-  name: string;
-  service: string;
-}
+interface AnalyticsData { day: string; clicks: number; dateKey?: string; }
+interface Garage { id: string; name: string; service: string; }
+
+const SERVICES = ["Detailing", "Tinting", "Wrap", "Mechanical", "Electrical"] as const;
+
+const makeKey = (g: Garage) => `${g.service}|${g.id}`;
+const parseKey = (key: string) => { const [service, id] = key.split("|"); return { service, id }; };
+
+function startOfWeek(d = new Date()) { const x = new Date(d); x.setHours(0,0,0,0); x.setDate(x.getDate()-x.getDay()); return x; }
+function startOfMonth(d = new Date()) { const x = new Date(d.getFullYear(), d.getMonth(), 1); x.setHours(0,0,0,0); return x; }
+function daysInMonth(d = new Date()) { return new Date(d.getFullYear(), d.getMonth()+1, 0).getDate(); }
 
 const AdminAnalytics = () => {
-  const [selectedGarage, setSelectedGarage] = useState<string>("");
+  const [selectedKey, setSelectedKey] = useState<string>("");
   const [garages, setGarages] = useState<Garage[]>([]);
-const [analyticsData, setAnalyticsData] = useState<AnalyticsData[]>([]);
+  const [analyticsData, setAnalyticsData] = useState<AnalyticsData[]>([]);
+  const [period, setPeriod] = useState<Period>("month");
+  const [loading, setLoading] = useState(false);
+  const midnightTimer = useRef<number | null>(null);
 
-// Fetch garages from all service collections
-const fetchGarages = async () => {
-  const services = ["Detailing", "Tinting", "Wrap", "Mechanical", "Electrical"];
-  const garageList: Garage[] = [];
-
-  for (const service of services) {
-    const snapshot = await getDocs(collection(db, service));
-    snapshot.forEach(doc => {
-      const data = doc.data();
-      garageList.push({
-        id: doc.id,
-        name: data.name,
-        service,
-      });
-    });
-  }
-
-  setGarages(garageList);
-};
-
-// Fetch weekly analytics for selected garage
-const fetchWeeklyAnalytics = async (garage: Garage) => {
-  const startOfWeek = new Date();
-  startOfWeek.setDate(startOfWeek.getDate() - startOfWeek.getDay());
-  startOfWeek.setHours(0, 0, 0, 0);
-
-  const q = query(
-    collection(db, garage.service, garage.id, "analytics"),
-    where("timestamp", ">=", Timestamp.fromDate(startOfWeek))
-  );
-
-  const snapshot = await getDocs(q);
-  const dailyClicks: { [key: string]: number } = {};
-
-  snapshot.forEach(doc => {
-    const date = doc.data().timestamp?.toDate?.();
-    if (!date) return;
-    const day = date.toLocaleDateString("en-US", { weekday: "long" });
-    dailyClicks[day] = (dailyClicks[day] || 0) + 1;
-  });
-
-  const weekDays = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
-  const data: AnalyticsData[] = weekDays.map(day => ({
-    day,
-    clicks: dailyClicks[day] || 0,
-  }));
-
-  setAnalyticsData(data);
-};
-
-
-  const totalClicks = analyticsData.reduce((sum, data) => sum + data.clicks, 0);
-  const averageDaily = Math.round(totalClicks / 7);
-  const selectedGarageName =
-    garages.find((g) => g.id === selectedGarage)?.name || "All Garages";
-
+  // ---- fetch garages once
   useEffect(() => {
-  fetchGarages();
-}, []);
+    (async () => {
+      const list: Garage[] = [];
+      for (const service of SERVICES) {
+        const snap = await getDocs(collection(db, service));
+        snap.forEach((doc) => {
+          const data = doc.data() as any;
+          list.push({ id: doc.id, name: data.name, service });
+        });
+      }
+      list.sort((a,b)=> (a.name+a.service).localeCompare(b.name+b.service));
+      setGarages(list);
+      if (!selectedKey && list.length) setSelectedKey(makeKey(list[0]));
+    })();
+  }, []);
 
-useEffect(() => {
-  const garage = garages.find(g => g.id === selectedGarage);
-  if (garage) fetchWeeklyAnalytics(garage);
-}, [selectedGarage]);
+  const selectedGarage = useMemo(() => {
+    if (!selectedKey) return undefined;
+    const { id, service } = parseKey(selectedKey);
+    return garages.find((g) => g.id === id && g.service === service);
+  }, [selectedKey, garages]);
 
-useEffect(() => {
-  const checkForRefresh = () => {
-    const now = new Date();
-    if (now.getDay() === 0 && now.getHours() === 23 && now.getMinutes() === 59) {
-      const garage = garages.find(g => g.id === selectedGarage);
-      if (garage) fetchWeeklyAnalytics(garage);
-      console.log("Auto-refreshing analytics data...");
+  // ---- manual fetch (also used on selection change)
+  const fetchAnalytics = async () => {
+    if (!selectedGarage) return;
+    setLoading(true);
+    try {
+      const start = period === "week" ? startOfWeek() : startOfMonth();
+      const col = collection(db, selectedGarage.service, selectedGarage.id, "analytics");
+      const qy = query(col, where("timestamp", ">=", Timestamp.fromDate(start)), orderBy("timestamp","asc"));
+      const snap = await getDocs(qy);
+
+      const map: Record<string, number> = {};
+      snap.forEach(d => {
+        const dt = d.data().timestamp?.toDate?.();
+        if (!dt) return;
+        const key = dt.toISOString().slice(0,10);
+        map[key] = (map[key] || 0) + 1;
+      });
+
+      const rows: AnalyticsData[] = [];
+      if (period === "week") {
+        const labels = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+        const s = startOfWeek();
+        for (let i=0;i<7;i++){
+          const d = new Date(s); d.setDate(s.getDate()+i);
+          const key = d.toISOString().slice(0,10);
+          rows.push({ day: labels[i], clicks: map[key] || 0, dateKey: key });
+        }
+      } else {
+        const s = startOfMonth();
+        const n = daysInMonth(s);
+        for (let i=1;i<=n;i++){
+          const d = new Date(s.getFullYear(), s.getMonth(), i);
+          const key = d.toISOString().slice(0,10);
+          rows.push({ day: String(i), clicks: map[key] || 0, dateKey: key });
+        }
+      }
+      setAnalyticsData(rows);
+    } finally {
+      setLoading(false);
     }
   };
 
-  const interval = setInterval(checkForRefresh, 60000);
-  return () => clearInterval(interval);
-}, [garages, selectedGarage]);
+  // fetch when you change garage or period (cheap enough)
+  useEffect(() => { fetchAnalytics(); }, [selectedGarage, period]);
 
+  // ---- schedule ONE fetch at local midnight, then reschedule daily
+  useEffect(() => {
+    const scheduleMidnight = () => {
+      if (midnightTimer.current) window.clearTimeout(midnightTimer.current);
+      const now = new Date();
+      const next = new Date(now);
+      next.setDate(now.getDate() + 1);
+      next.setHours(0,0,5,0); // a few seconds after midnight
+      const ms = next.getTime() - now.getTime();
+      midnightTimer.current = window.setTimeout(async () => {
+        await fetchAnalytics(); // one read burst per day
+        scheduleMidnight();     // schedule next day
+      }, ms);
+    };
+    scheduleMidnight();
+    return () => { if (midnightTimer.current) window.clearTimeout(midnightTimer.current); };
+  }, [selectedGarage, period]);
+
+  const totalClicks = analyticsData.reduce((s,r)=>s+r.clicks,0);
+  const averageDaily = analyticsData.length ? Math.round(totalClicks/analyticsData.length) : 0;
+  const selectedGarageName = selectedGarage ? selectedGarage.name : "All Garages";
+
+  // CSV export
+  const exportCSV = () => {
+    const header = ["Date","Label","Clicks"];
+    const rows = analyticsData.map(r=>[r.dateKey ?? "", r.day, String(r.clicks)]);
+    const csv = [header, ...rows].map(a=>a.map(x=>`"${x}"`).join(",")).join("\n");
+    const blob = new Blob([csv], { type:"text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${selectedGarageName.replace(/\s+/g,"_")}_${period}_analytics.csv`;
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-white">
       <Header />
-
       <div className="container mx-auto px-4 py-8">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-blue-900 mb-2">
-            Admin Analytics Dashboard
-          </h1>
-          <p className="text-gray-600">
-            Weekly click analytics for garage listings
-          </p>
+        <div className="mb-8 flex items-end justify-between gap-4">
+          <div>
+            <h1 className="text-3xl font-bold text-blue-900 mb-2">Admin Analytics Dashboard</h1>
+            <p className="text-gray-600">
+              {period === "week" ? "Weekly" : "Monthly"} click analytics for garage listings
+            </p>
+          </div>
+          <div className="flex items-center gap-2">
+            <Button variant="outline" onClick={fetchAnalytics} disabled={loading}>
+              <RefreshCw className="h-4 w-4 mr-2" />
+              Refresh
+            </Button>
+            <Button onClick={exportCSV}>
+              <Download className="h-4 w-4 mr-2" />
+              Export CSV
+            </Button>
+          </div>
         </div>
 
-        {/* Garage Selection */}
+        {/* Selectors */}
         <Card className="mb-8">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -154,81 +173,80 @@ useEffect(() => {
               Select Garage
             </CardTitle>
           </CardHeader>
-          <CardContent>
-            <Select value={selectedGarage} onValueChange={setSelectedGarage}>
-              <SelectTrigger className="w-full max-w-md">
+          <CardContent className="flex flex-col md:flex-row gap-4">
+            <Select value={selectedKey} onValueChange={setSelectedKey}>
+              <SelectTrigger className="w-full md:w-[420px]">
                 <SelectValue placeholder="Choose a garage to view analytics" />
               </SelectTrigger>
               <SelectContent>
-                {garages.map((garage) => (
-                  <SelectItem key={garage.id} value={garage.id}>
-                    {garage.name} - {garage.service}
-                  </SelectItem>
-                ))}
+                {garages.map((g) => {
+                  const value = makeKey(g);
+                  return (
+                    <SelectItem key={value} value={value}>
+                      {g.name} - {g.service}
+                    </SelectItem>
+                  );
+                })}
+              </SelectContent>
+            </Select>
+
+            <Select value={period} onValueChange={(v: Period) => setPeriod(v)}>
+              <SelectTrigger className="w-full md:w-[200px]">
+                <SelectValue placeholder="Period" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="week">Last 7 Days</SelectItem>
+                <SelectItem value="month">This Month</SelectItem>
               </SelectContent>
             </Select>
           </CardContent>
         </Card>
 
+        {/* Dashboard */}
         {selectedGarage && (
           <>
-            {/* Summary Cards */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium">
-                    Total Clicks (7 Days)
+                    Total Clicks ({period === "week" ? "7 Days" : "This Month"})
                   </CardTitle>
                   <MousePointer className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold text-blue-900">
-                    {totalClicks}
-                  </div>
-                  <p className="text-xs text-muted-foreground">
-                    +20.1% from last week
-                  </p>
+                  <div className="text-2xl font-bold text-blue-900">{totalClicks}</div>
+                  <p className="text-xs text-muted-foreground">Manual or midnight refresh only</p>
                 </CardContent>
               </Card>
 
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">
-                    Daily Average
-                  </CardTitle>
+                  <CardTitle className="text-sm font-medium">Daily Average</CardTitle>
                   <TrendingUp className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold text-blue-900">
-                    {averageDaily}
-                  </div>
-                  <p className="text-xs text-muted-foreground">
-                    clicks per day
-                  </p>
+                  <div className="text-2xl font-bold text-blue-900">{averageDaily}</div>
+                  <p className="text-xs text-muted-foreground">clicks per day</p>
                 </CardContent>
               </Card>
 
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">
-                    Last Updated
-                  </CardTitle>
+                  <CardTitle className="text-sm font-medium">Last Updated</CardTitle>
                   <Calendar className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
                   <div className="text-2xl font-bold text-blue-900">Today</div>
-                  <p className="text-xs text-muted-foreground">
-                    Auto-refresh: Sunday 11:59 PM
-                  </p>
+                  <p className="text-xs text-muted-foreground">Auto at local 00:00</p>
                 </CardContent>
               </Card>
             </div>
 
-            {/* Chart */}
             <Card className="mb-8">
               <CardHeader>
                 <CardTitle>
-                  Daily Click Analytics - {selectedGarageName}
+                  {period === "week" ? `Daily Click Analytics - ${selectedGarageName}`
+                                     : `Monthly Click Analytics - ${selectedGarageName}`}
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -237,56 +255,39 @@ useEffect(() => {
                     <BarChart data={analyticsData}>
                       <CartesianGrid strokeDasharray="3 3" />
                       <XAxis dataKey="day" />
-                      <YAxis />
+                      <YAxis allowDecimals={false} />
                       <Tooltip />
-                      <Bar
-                        dataKey="clicks"
-                        fill="#3b82f6"
-                        radius={[4, 4, 0, 0]}
-                      />
+                      <Bar dataKey="clicks" radius={[4,4,0,0]} fill="#3b82f6" />
                     </BarChart>
                   </ResponsiveContainer>
                 </div>
               </CardContent>
             </Card>
 
-            {/* Table View */}
             <Card>
               <CardHeader>
-                <CardTitle>Detailed Daily Breakdown</CardTitle>
+                <CardTitle>Detailed {period === "week" ? "Daily" : "Monthly"} Breakdown</CardTitle>
               </CardHeader>
               <CardContent>
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Day</TableHead>
+                      <TableHead>{period === "week" ? "Day" : "Date"}</TableHead>
                       <TableHead>Clicks</TableHead>
                       <TableHead>Performance</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {analyticsData.map((data, index) => (
-                      <TableRow key={index}>
-                        <TableCell className="font-medium">
-                          {data.day}
-                        </TableCell>
-                        <TableCell>{data.clicks}</TableCell>
+                    {analyticsData.map((r, i) => (
+                      <TableRow key={r.dateKey ?? i}>
+                        <TableCell className="font-medium">{r.day}</TableCell>
+                        <TableCell>{r.clicks}</TableCell>
                         <TableCell>
                           <Badge
-                            variant={
-                              data.clicks >= averageDaily
-                                ? "default"
-                                : "secondary"
-                            }
-                            className={
-                              data.clicks >= averageDaily
-                                ? "bg-green-100 text-green-700"
-                                : "bg-gray-100 text-gray-700"
-                            }
+                            variant={r.clicks >= averageDaily ? "default" : "secondary"}
+                            className={r.clicks >= averageDaily ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-700"}
                           >
-                            {data.clicks >= averageDaily
-                              ? "Above Average"
-                              : "Below Average"}
+                            {r.clicks >= averageDaily ? "Above Average" : "Below Average"}
                           </Badge>
                         </TableCell>
                       </TableRow>

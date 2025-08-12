@@ -23,16 +23,10 @@ interface HeroSectionProps {
   isVerified: boolean;
 }
 
-/** Create (or return existing) invisible reCAPTCHA */
-function ensureRecaptcha() {
-  if (!window.recaptchaVerifier) {
-    window.recaptchaVerifier = new RecaptchaVerifier(auth, "recaptcha-container", {
-      size: "invisible",
-      callback: () => {},
-      "expired-callback": () => {},
-    });
-  }
-  return window.recaptchaVerifier;
+function createFirebaseRecaptcha() {
+  return new RecaptchaVerifier(auth, "recaptcha-container", {
+    size: "invisible",
+  });
 }
 
 const HeroSection = ({ onVerificationComplete, isVerified }: HeroSectionProps) => {
@@ -44,22 +38,6 @@ const HeroSection = ({ onVerificationComplete, isVerified }: HeroSectionProps) =
   const recaptchaRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
 
-  // Render the invisible reCAPTCHA once on mount
-  useEffect(() => {
-    const init = async () => {
-      try {
-        const v = ensureRecaptcha();
-        if (window.recaptchaWidgetId === undefined) {
-          window.recaptchaWidgetId = await v.render();
-        }
-      } catch {
-        // ignore; will be retried on send
-      }
-    };
-    init();
-  }, []);
-
-  // Enter key handler (send or verify)
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Enter") {
@@ -74,19 +52,6 @@ const HeroSection = ({ onVerificationComplete, isVerified }: HeroSectionProps) =
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [confirmationResult, phoneNumber, verificationCode]);
 
-  const resetRecaptcha = () => {
-    try {
-      if (window.recaptchaWidgetId !== undefined && window.grecaptcha) {
-        window.grecaptcha.reset(window.recaptchaWidgetId);
-      }
-    } catch {
-      /* noop */
-    }
-    // force next call to recreate if needed
-    // (not strictly necessary but helps if verifier got into a bad state)
-    // delete window.recaptchaVerifier;
-  };
-
   const handleSendCode = async () => {
     if (!/^\d{10,15}$/.test(phoneNumber)) {
       toast({
@@ -99,10 +64,17 @@ const HeroSection = ({ onVerificationComplete, isVerified }: HeroSectionProps) =
 
     setIsSending(true);
     try {
-      const verifier = ensureRecaptcha();
-      if (window.recaptchaWidgetId === undefined) {
-        window.recaptchaWidgetId = await verifier.render();
-      }
+      // 1️⃣ Enterprise reCAPTCHA first
+      const siteKey = "6LcLVKQrAAAAAAZht5TSDGQRS0EfEBh8GrVpaBc6";
+      const token = await window.grecaptcha.enterprise.execute(siteKey, { action: "LOGIN" });
+
+      if (!token) throw new Error("Failed to get reCAPTCHA token");
+
+      // Optional: send token to backend for verification before proceeding
+
+      // 2️⃣ Now create Firebase invisible reCAPTCHA verifier
+      const verifier = createFirebaseRecaptcha();
+      await verifier.render();
 
       const formattedNumber = `+${phoneNumber}`;
       const confirmation = await signInWithPhoneNumber(auth, formattedNumber, verifier);
@@ -110,7 +82,6 @@ const HeroSection = ({ onVerificationComplete, isVerified }: HeroSectionProps) =
       setConfirmationResult(confirmation);
       toast({ title: "Code Sent!", description: `SMS sent to ${formattedNumber}` });
     } catch (error: any) {
-      resetRecaptcha();
       toast({
         title: "Failed to Send Code",
         description: error?.message || "Please try again.",
@@ -181,7 +152,7 @@ const HeroSection = ({ onVerificationComplete, isVerified }: HeroSectionProps) =
                 />
               </div>
 
-              {/* Invisible reCAPTCHA anchor */}
+              {/* reCAPTCHA container for Firebase */}
               <div ref={recaptchaRef} id="recaptcha-container" className="mb-4" />
 
               <Button

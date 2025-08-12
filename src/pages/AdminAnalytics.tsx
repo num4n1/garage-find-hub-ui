@@ -21,7 +21,7 @@ type Period = "week" | "month";
 interface AnalyticsData { day: string; clicks: number; dateKey?: string; }
 interface Garage { id: string; name: string; service: string; }
 
-const SERVICES = ["Detailing", "Tinting", "Wrap", "Mechanical", "Electrical"] as const;
+const SERVICES = ["Mechanical", "Wrapping", "Electrical", "PPF", "Painting", "Ceramic", "Upholstery", "Tinting"] as const;
 
 const makeKey = (g: Garage) => `${g.service}|${g.id}`;
 const parseKey = (key: string) => { const [service, id] = key.split("|"); return { service, id }; };

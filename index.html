@@ -6,11 +6,35 @@
     <title>YallaFinder</title>
     <link rel="icon" type="image/png" href="./public/assets/fav-white.png" />
 
-    <!-- reCAPTCHA Enterprise -->
-    <script src="https://www.google.com/recaptcha/enterprise.js?render=6LcLVKQrAAAAAAZht5TSDGQRS0EfEBh8GrVpaBc6"></script>
+    <!-- Cloudflare Turnstile (invisible) -->
+    <script
+      src="https://challenges.cloudflare.com/turnstile/v0/api.js"
+      async
+      defer
+    ></script>
   </head>
 
   <body>
+    <!-- Invisible Turnstile widget -->
+    <!-- IMPORTANT: put YOUR real Turnstile site key below -->
+    <div
+      id="cf-turnstile"
+      class="cf-turnstile"
+      data-sitekey="0x4AAAAAABrCnTwXPra19K2b"
+      data-callback="onTurnstileSuccess"
+      data-size="invisible"
+    ></div>
+
+    <script>
+      // Called by Turnstile when it issues a token
+      function onTurnstileSuccess(token) {
+        window.turnstileToken = token; // used by the app before sending OTP
+        // If you need the widget id later (to re-execute), it’s set by the script:
+        const el = document.getElementById("cf-turnstile");
+        window.turnstileWidgetId = el?.dataset?.widgetId || null;
+      }
+    </script>
+
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>

@@ -12,8 +12,15 @@ import {
 
 declare global {
   interface Window {
-    recaptchaVerifier?: RecaptchaVerifier;
-    recaptchaWidgetId?: number | string;
+    // Cloudflare Turnstile
+    turnstile?: {
+      execute: (widgetId?: string) => void;
+      render?: (selector: string, options: any) => string;
+    };
+    turnstileToken?: string | null;
+    turnstileWidgetId?: string | null;
+
+    // Firebase reCAPTCHA verifier
     grecaptcha?: any;
   }
 }
@@ -23,21 +30,61 @@ interface HeroSectionProps {
   isVerified: boolean;
 }
 
+/** Create Firebase invisible reCAPTCHA (required by Firebase) */
 function createFirebaseRecaptcha() {
-  return new RecaptchaVerifier(auth, "recaptcha-container", {
-    size: "invisible",
+  return new RecaptchaVerifier(auth, "recaptcha-container", { size: "invisible" });
+}
+
+/** Get (or trigger) a Turnstile token and return it */
+async function getTurnstileToken(): Promise<string> {
+  // Already have a recent token
+  if (window.turnstileToken) return window.turnstileToken;
+
+  // Try to execute the invisible widget
+  try {
+    // If widget id got attached by the script, call execute on it
+    if (window.turnstile && window.turnstileWidgetId) {
+      window.turnstile.execute(window.turnstileWidgetId as any);
+    } else if (window.turnstile) {
+      // Some setups let you call execute() without an id if only one widget exists
+      window.turnstile.execute();
+    }
+  } catch {
+    // ignore; we'll just wait for callback
+  }
+
+  // Wait until onTurnstileSuccess sets window.turnstileToken
+  const token = await new Promise<string>((resolve, reject) => {
+    let elapsed = 0;
+    const max = 8000; // 8s timeout
+    const step = 100;
+
+    const timer = setInterval(() => {
+      elapsed += step;
+      if (window.turnstileToken) {
+        clearInterval(timer);
+        resolve(window.turnstileToken);
+      } else if (elapsed >= max) {
+        clearInterval(timer);
+        reject(new Error("Turnstile timed out"));
+      }
+    }, step);
   });
+
+  return token;
 }
 
 const HeroSection = ({ onVerificationComplete, isVerified }: HeroSectionProps) => {
   const [phoneNumber, setPhoneNumber] = useState("");
   const [verificationCode, setVerificationCode] = useState("");
-  const [confirmationResult, setConfirmationResult] = useState<ConfirmationResult | null>(null);
+  const [confirmationResult, setConfirmationResult] =
+    useState<ConfirmationResult | null>(null);
   const [isSending, setIsSending] = useState(false);
   const [isVerifying, setIsVerifying] = useState(false);
   const recaptchaRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
 
+  // Enter key handler (send or verify)
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Enter") {
@@ -64,23 +111,27 @@ const HeroSection = ({ onVerificationComplete, isVerified }: HeroSectionProps) =
 
     setIsSending(true);
     try {
-      // 1️⃣ Enterprise reCAPTCHA first
-      const siteKey = "6LcLVKQrAAAAAAZht5TSDGQRS0EfEBh8GrVpaBc6";
-      const token = await window.grecaptcha.enterprise.execute(siteKey, { action: "LOGIN" });
+      // 1) Get a Turnstile token (silent)
+      const token = await getTurnstileToken();
+      if (!token) throw new Error("Failed to get Turnstile token");
 
-      if (!token) throw new Error("Failed to get reCAPTCHA token");
+      // (Optional) POST token to your backend for verification:
+      // const ok = await fetch('/verify-turnstile', { method: 'POST', ... })
+      // if (!ok) throw new Error('Bot check failed')
 
-      // Optional: send token to backend for verification before proceeding
-
-      // 2️⃣ Now create Firebase invisible reCAPTCHA verifier
+      // 2) Create Firebase invisible reCAPTCHA verifier (required by Firebase)
       const verifier = createFirebaseRecaptcha();
       await verifier.render();
 
+      // 3) Send OTP
       const formattedNumber = `+${phoneNumber}`;
       const confirmation = await signInWithPhoneNumber(auth, formattedNumber, verifier);
 
       setConfirmationResult(confirmation);
       toast({ title: "Code Sent!", description: `SMS sent to ${formattedNumber}` });
+
+      // Reset saved Turnstile token so a future attempt re-executes if needed
+      window.turnstileToken = null;
     } catch (error: any) {
       toast({
         title: "Failed to Send Code",
@@ -123,8 +174,12 @@ const HeroSection = ({ onVerificationComplete, isVerified }: HeroSectionProps) =
       <div className="text-center py-8 bg-gradient-to-r from-blue-600 to-blue-700 text-white">
         <div className="max-w-4xl mx-auto px-4">
           <ScanSearch className="h-16 w-16 mx-auto mb-6 text-white" />
-          <h1 className="text-3xl md:text-4xl font-bold mb-4">Find the Perfect Garage for Your Car</h1>
-          <p className="text-xl text-blue-100">Discover trusted local garages for all your automotive needs</p>
+          <h1 className="text-3xl md:text-4xl font-bold mb-4">
+            Find the Perfect Garage for Your Car
+          </h1>
+          <p className="text-xl text-blue-100">
+            Discover trusted local garages for all your automotive needs
+          </p>
         </div>
       </div>
     );
@@ -135,12 +190,16 @@ const HeroSection = ({ onVerificationComplete, isVerified }: HeroSectionProps) =
       <div className="max-w-2xl mx-auto px-4 text-center">
         <ScanSearch className="h-20 w-20 mx-auto mb-6" />
         <h1 className="text-4xl md:text-5xl font-bold mb-6">Welcome to YallaFinder</h1>
-        <p className="text-xl text-blue-100 mb-8">Verify your phone number to access trusted garages</p>
+        <p className="text-xl text-blue-100 mb-8">
+          Verify your phone number to access trusted garages
+        </p>
 
         <div className="bg-white rounded-lg shadow-xl p-8 text-gray-900 max-w-md mx-auto">
           {!confirmationResult ? (
             <>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Phone Number</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Phone Number
+              </label>
               <div className="relative mb-6">
                 <Phone className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
                 <Input
@@ -152,7 +211,7 @@ const HeroSection = ({ onVerificationComplete, isVerified }: HeroSectionProps) =
                 />
               </div>
 
-              {/* reCAPTCHA container for Firebase */}
+              {/* Firebase reCAPTCHA anchor (invisible) */}
               <div ref={recaptchaRef} id="recaptcha-container" className="mb-4" />
 
               <Button
@@ -165,7 +224,9 @@ const HeroSection = ({ onVerificationComplete, isVerified }: HeroSectionProps) =
             </>
           ) : (
             <>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Verification Code</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Verification Code
+              </label>
               <Input
                 type="text"
                 placeholder="Enter 6-digit code"

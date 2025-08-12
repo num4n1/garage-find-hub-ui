@@ -1,1 +1,1 @@
-www.yallafinder.com.
+www.yallafinder.com

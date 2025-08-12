@@ -99,7 +99,7 @@ const GarageCard = ({ garage, service }: GarageCardProps) => {
         {/* specialities */}
         <div>
           <h4 className="text-sm font-semibold text-blue-800 mb-2">
-            specialities:
+            Specialities:
           </h4>
           <div className="flex flex-wrap gap-1">
             {(garage.specialities || []).map((specialty, index) => (

@@ -183,24 +183,26 @@ const HeroSection = ({
     <div className="bg-gradient-to-r from-blue-600 to-blue-700 text-white min-h-[100dvh] flex items-center justify-center px-4 py-8">
       {/* Center block; the 100dvh ensures true middle on mobile */}
       <div className="w-full max-w-2xl mx-auto text-center">
-        <div className="space-y-6 sm:space-y-8">
-          <ScanSearch className="h-16 w-16 sm:h-20 sm:w-20 mx-auto text-white" />
-          <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold leading-tight">
-            Welcome to YallaFinder
-          </h1>
-          <p className="text-lg sm:text-xl text-blue-100 max-w-lg mx-auto">
-            Verify your phone number to access trusted garages
-          </p>
+        <div className="space-y-8 sm:space-y-10">
+          <ScanSearch className="h-12 w-12 sm:h-16 sm:w-16 md:h-20 md:w-20 mx-auto text-white" />
+          <div className="space-y-4">
+            <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold leading-tight tracking-tight">
+              Welcome to YallaFinder
+            </h1>
+            <p className="text-base sm:text-lg md:text-xl text-blue-100 max-w-md mx-auto leading-relaxed">
+              Verify your phone number to access trusted garages
+            </p>
+          </div>
 
-          <div className="bg-white rounded-xl shadow-2xl p-6 sm:p-8 text-gray-900 max-w-sm sm:max-w-md mx-auto">
+          <div className="bg-white rounded-2xl shadow-2xl p-6 sm:p-8 text-gray-900 max-w-sm sm:max-w-md lg:max-w-lg mx-auto">
             {!confirmationResult ? (
-              <div className="space-y-6">
+              <div className="space-y-5">
                 {/* Phone Number Input Section */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-3 text-left">
+                <div className="space-y-3">
+                  <label className="block text-sm font-semibold text-gray-700 text-left">
                     Phone Number
                   </label>
-                  <div className="flex gap-3">
+                  <div className="flex gap-2 sm:gap-3">
                     {/* Country Code Selector */}
                     <div className="flex-shrink-0">
                       <CountrySelector
@@ -210,10 +212,10 @@ const HeroSection = ({
                           setCountryCode(country.dialCode);
                         }}
                         buttonStyle={{
-                          height: "40px",
-                          minWidth: "80px",
-                          border: "1px solid #e2e8f0",
-                          borderRadius: "6px",
+                          height: "44px",
+                          minWidth: "75px",
+                          border: "1px solid #d1d5db",
+                          borderRadius: "8px",
                           backgroundColor: "white",
                           fontSize: "14px",
                           fontWeight: 500,
@@ -223,17 +225,17 @@ const HeroSection = ({
                           justifyContent: "center",
                           gap: "4px",
                           cursor: "pointer",
-                          transition: "all 0.2s",
+                          transition: "all 0.2s ease-in-out",
                         }}
                         dropdownStyleProps={{
                           style: {
                             zIndex: 1000,
                             backgroundColor: "white",
-                            border: "1px solid #e2e8f0",
-                            borderRadius: "8px",
+                            border: "1px solid #e5e7eb",
+                            borderRadius: "10px",
                             boxShadow:
-                              "0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)",
-                            maxHeight: "260px",
+                              "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)",
+                            maxHeight: "280px",
                             overflow: "auto",
                           },
                         }}
@@ -242,7 +244,7 @@ const HeroSection = ({
 
                     {/* Phone Number Input */}
                     <div className="flex-1 relative">
-                      <Phone className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
+                      <Phone className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                       <Input
                         type="tel"
                         inputMode="numeric"
@@ -251,7 +253,7 @@ const HeroSection = ({
                         onChange={(e) =>
                           setPhoneNumber(e.target.value.replace(/\D/g, ""))
                         }
-                        className="pl-10 h-10 text-base border-gray-300 focus:border-blue-500 focus:ring-blue-500"
+                        className="pl-10 h-11 text-base border-gray-300 focus:border-blue-500 focus:ring-blue-500 rounded-lg"
                       />
                     </div>
                   </div>
@@ -260,21 +262,21 @@ const HeroSection = ({
                 {/* Invisible reCAPTCHA anchor */}
                 <div ref={recaptchaRef} id="recaptcha-container" />
 
-                {/* Button - moved up by reducing spacing */}
-                <div className="mt-4">
+                {/* Send Button */}
+                <div className="pt-2">
                   <Button
                     onClick={handleSendCode}
                     disabled={isSending}
-                    className="w-full bg-blue-600 hover:bg-blue-700 text-base sm:text-lg py-3 h-12 transition-all duration-200 shadow-lg hover:shadow-xl"
+                    className="w-full bg-blue-600 hover:bg-blue-700 text-sm sm:text-base font-semibold py-3 h-11 sm:h-12 transition-all duration-200 shadow-lg hover:shadow-xl rounded-lg"
                   >
                     {isSending ? "Sending..." : "Send Verification Code"}
                   </Button>
                 </div>
               </div>
             ) : (
-              <div className="space-y-6">
-                <div>
-                  <label className="block text-md font-medium text-gray-700 mb-3 text-center">
+              <div className="space-y-5">
+                <div className="space-y-3">
+                  <label className="block text-sm font-semibold text-gray-700 text-center">
                     Verification Code
                   </label>
                   <Input
@@ -285,22 +287,24 @@ const HeroSection = ({
                     onChange={(e) =>
                       setVerificationCode(e.target.value.replace(/\D/g, ""))
                     }
-                    className="text-center text-lg tracking-widest h-12 border-gray-300 focus:border-blue-500 focus:ring-blue-500"
+                    className="text-center text-lg tracking-widest h-11 sm:h-12 border-gray-300 focus:border-blue-500 focus:ring-blue-500 rounded-lg"
                     maxLength={6}
                   />
                 </div>
-                <Button
-                  onClick={handleVerifyCode}
-                  disabled={isVerifying}
-                  className="w-full bg-blue-600 hover:bg-blue-700 text-base sm:text-lg py-3 h-12 transition-all duration-200 shadow-lg hover:shadow-xl"
-                >
-                  {isVerifying ? "Verifying..." : "Verify & Continue"}
-                </Button>
+                <div className="pt-2">
+                  <Button
+                    onClick={handleVerifyCode}
+                    disabled={isVerifying}
+                    className="w-full bg-blue-600 hover:bg-blue-700 text-sm sm:text-base font-semibold py-3 h-11 sm:h-12 transition-all duration-200 shadow-lg hover:shadow-xl rounded-lg"
+                  >
+                    {isVerifying ? "Verifying..." : "Verify & Continue"}
+                  </Button>
+                </div>
               </div>
             )}
           </div>
 
-          <p className="text-blue-200 text-sm max-w-md mx-auto leading-relaxed">
+          <p className="text-blue-200 text-xs sm:text-sm max-w-sm mx-auto leading-relaxed">
             Your privacy is protected. We only use your number for verification.
           </p>
         </div>

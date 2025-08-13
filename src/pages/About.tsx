@@ -11,10 +11,10 @@ const About = () => {
           {/* Content Section */}
           <div className="space-y-6 order-2 lg:order-1">
             <div className="flex items-center space-x-3 mb-4">
-              <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold text-blue-900">About YallaFinder</h1>
+              <h1 className="text-2xl md:text-3xl lg:text-5xl font-bold text-blue-900">About YallaFinder</h1>
             </div>
             
-            <p className="text-base md:text-lg text-gray-700 leading-relaxed">
+            <p className="text-base md:text-lg lg:text-xl text-gray-700 leading-relaxed">
               YallaFinder is your trusted platform for discovering the best local car service garages. 
               We connect car owners with professional garages offering specialized services like tinting, 
               wrapping, detailing, painting, and more.
@@ -22,10 +22,10 @@ const About = () => {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-6">
               <div className="flex items-start space-x-3">
-                <Shield className="h-6 w-6 text-blue-600 mt-1 flex-shrink-0" />
+                <Shield className="h-6 w-6 lg:h-8 lg:w-8 text-blue-600 mt-1 flex-shrink-0" />
                 <div>
-                  <h3 className="font-semibold text-blue-900 mb-1">Verified Garages</h3>
-                  <p className="text-sm text-gray-600">All garages are verified and trusted by our community</p>
+                  <h3 className="font-semibold text-blue-900 mb-1 lg:text-lg">Verified Garages</h3>
+                  <p className="text-sm lg:text-base text-gray-600">All garages are verified and trusted by our community</p>
                 </div>
               </div>
               
@@ -33,7 +33,7 @@ const About = () => {
                 <Users className="h-6 w-6 text-blue-600 mt-1 flex-shrink-0" />
                 <div>
                   <h3 className="font-semibold text-blue-900 mb-1">Local Network</h3>
-                  <p className="text-sm text-gray-600">Find garages in your area with specialized services</p>
+                  <p className="text-sm lg:text-base text-gray-600">Find garages in your area with specialized services</p>
                 </div>
               </div>
               
@@ -41,7 +41,7 @@ const About = () => {
                 <Phone className="h-6 w-6 text-blue-600 mt-1 flex-shrink-0" />
                 <div>
                   <h3 className="font-semibold text-blue-900 mb-1">Direct Contact</h3>
-                  <p className="text-sm text-gray-600">Connect directly with garage owners via WhatsApp</p>
+                  <p className="text-sm lg:text-base text-gray-600">Connect directly with garage owners via WhatsApp</p>
                 </div>
               </div>
               
@@ -49,7 +49,7 @@ const About = () => {
                 <MapPin className="h-6 w-6 text-blue-600 mt-1 flex-shrink-0" />
                 <div>
                   <h3 className="font-semibold text-blue-900 mb-1">Easy Discovery</h3>
-                  <p className="text-sm text-gray-600">Browse by service type to find exactly what you need</p>
+                  <p className="text-sm lg:text-base text-gray-600">Browse by service type to find exactly what you need</p>
                 </div>
               </div>
             </div>
@@ -57,11 +57,11 @@ const About = () => {
 
           {/* Image Section */}
           <div className="flex justify-center lg:justify-end order-2 lg:order-2">
-            <div className="relative w-full max-w-sm md:max-w-md">
+            <div className="relative w-full max-w-sm md:max-w-md lg:max-w-lg">
               <img 
                 src="/assets/Nissan-Patrol-Image-AboutPage.png"
                 alt="YallaFinder map icon"
-                className="w-full h-auto object-cover rounded-lg "
+                className="w-full h-auto object-cover rounded-lg"
               />
             </div>
           </div>

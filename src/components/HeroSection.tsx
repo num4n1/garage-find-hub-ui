@@ -165,7 +165,7 @@ const HeroSection = ({ onVerificationComplete, isVerified }: HeroSectionProps) =
 
   return (
     <div className="bg-gradient-to-r from-blue-600 to-blue-700 text-white min-h-screen flex items-center justify-center">
-      <div className="max-w-2xl mx-auto px-4 text-center">
+      <div className="max-w-2xl mx-auto px-4 text-center mt-[-40px] sm:mt-0">
         <ScanSearch className="h-20 w-20 mx-auto mb-6" />
         <h1 className="text-4xl md:text-5xl font-bold mb-6">Welcome to YallaFinder</h1>
         <p className="text-xl text-blue-100 mb-8">Verify your phone number to access trusted garages</p>

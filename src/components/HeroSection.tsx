@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Phone, ScanSearch } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { auth } from "@/lib/firebase";
-import { CountrySelector } from "react-international-phone";
+import { CountrySelector, type CountryIso2 } from "react-international-phone";
 import {
   RecaptchaVerifier,
   signInWithPhoneNumber,
@@ -27,20 +27,30 @@ interface HeroSectionProps {
 /** Create (or return existing) invisible reCAPTCHA */
 function ensureRecaptcha() {
   if (!window.recaptchaVerifier) {
-    window.recaptchaVerifier = new RecaptchaVerifier(auth, "recaptcha-container", {
-      size: "invisible",
-      callback: () => {},
-      "expired-callback": () => {},
-    });
+    window.recaptchaVerifier = new RecaptchaVerifier(
+      auth,
+      "recaptcha-container",
+      {
+        size: "invisible",
+        callback: () => {},
+        "expired-callback": () => {},
+      }
+    );
   }
   return window.recaptchaVerifier;
 }
 
-const HeroSection = ({ onVerificationComplete, isVerified }: HeroSectionProps) => {
+const HeroSection = ({
+  onVerificationComplete,
+  isVerified,
+}: HeroSectionProps) => {
   const [phoneNumber, setPhoneNumber] = useState("");
-  const [countryCode, setCountryCode] = useState("971");
+  // IMPORTANT: keep iso2 (country) separate from dial code
+  const [countryIso2, setCountryIso2] = useState<CountryIso2>("ae"); // UAE
+  const [countryCode, setCountryCode] = useState("971"); // dial code
   const [verificationCode, setVerificationCode] = useState("");
-  const [confirmationResult, setConfirmationResult] = useState<ConfirmationResult | null>(null);
+  const [confirmationResult, setConfirmationResult] =
+    useState<ConfirmationResult | null>(null);
   const [isSending, setIsSending] = useState(false);
   const [isVerifying, setIsVerifying] = useState(false);
   const recaptchaRef = useRef<HTMLDivElement>(null);
@@ -84,9 +94,6 @@ const HeroSection = ({ onVerificationComplete, isVerified }: HeroSectionProps) =
     } catch {
       /* noop */
     }
-    // force next call to recreate if needed
-    // (not strictly necessary but helps if verifier got into a bad state)
-    // delete window.recaptchaVerifier;
   };
 
   const handleSendCode = async () => {
@@ -107,10 +114,17 @@ const HeroSection = ({ onVerificationComplete, isVerified }: HeroSectionProps) =
       }
 
       const formattedNumber = `+${countryCode}${phoneNumber}`;
-      const confirmation = await signInWithPhoneNumber(auth, formattedNumber, verifier);
+      const confirmation = await signInWithPhoneNumber(
+        auth,
+        formattedNumber,
+        verifier
+      );
 
       setConfirmationResult(confirmation);
-      toast({ title: "Code Sent!", description: `SMS sent to ${formattedNumber}` });
+      toast({
+        title: "Code Sent!",
+        description: `SMS sent to ${formattedNumber}`,
+      });
     } catch (error: any) {
       resetRecaptcha();
       toast({
@@ -154,70 +168,89 @@ const HeroSection = ({ onVerificationComplete, isVerified }: HeroSectionProps) =
       <div className="text-center py-8 bg-gradient-to-r from-blue-600 to-blue-700 text-white">
         <div className="max-w-4xl mx-auto px-4">
           <ScanSearch className="h-16 w-16 mx-auto mb-6 text-white" />
-          <h1 className="text-3xl md:text-4xl font-bold mb-4">Find the Perfect Garage for Your Car</h1>
-          <p className="text-xl text-blue-100">Discover trusted local garages for all your automotive needs</p>
+          <h1 className="text-3xl md:text-4xl font-bold mb-4">
+            Find the Perfect Garage for Your Car
+          </h1>
+          <p className="text-xl text-blue-100">
+            Discover trusted local garages for all your automotive needs
+          </p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="bg-gradient-to-r from-blue-600 to-blue-700 text-white min-h-screen flex items-center justify-center px-4 py-8">
-      <div className="w-full max-w-2xl mx-auto text-center flex flex-col justify-center min-h-[calc(100vh-4rem)]">
+    <div className="bg-gradient-to-r from-blue-600 to-blue-700 text-white min-h-[100dvh] flex items-center justify-center px-4 py-8">
+      {/* Center block; the 100dvh ensures true middle on mobile */}
+      <div className="w-full max-w-2xl mx-auto text-center">
         <div className="space-y-6 sm:space-y-8">
           <ScanSearch className="h-16 w-16 sm:h-20 sm:w-20 mx-auto text-white" />
-          <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold leading-tight">Welcome to YallaFinder</h1>
-          <p className="text-lg sm:text-xl text-blue-100 max-w-lg mx-auto">Verify your phone number to access trusted garages</p>
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold leading-tight">
+            Welcome to YallaFinder
+          </h1>
+          <p className="text-lg sm:text-xl text-blue-100 max-w-lg mx-auto">
+            Verify your phone number to access trusted garages
+          </p>
 
           <div className="bg-white rounded-xl shadow-2xl p-6 sm:p-8 text-gray-900 max-w-sm sm:max-w-md mx-auto">
             {!confirmationResult ? (
               <div className="space-y-6">
+                {/* Phone Number Input Section */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-3 text-left">Phone Number</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-3 text-left">
+                    Phone Number
+                  </label>
                   <div className="flex gap-3">
                     {/* Country Code Selector */}
                     <div className="flex-shrink-0">
                       <CountrySelector
-                        selectedCountry={countryCode}
-                        onSelect={(country) => setCountryCode(country.dialCode)}
+                        selectedCountry={countryIso2}
+                        onSelect={(country) => {
+                          setCountryIso2(country.iso2 as CountryIso2);
+                          setCountryCode(country.dialCode);
+                        }}
                         buttonStyle={{
-                          height: '40px',
-                          minWidth: '80px',
-                          border: '1px solid #e2e8f0',
-                          borderRadius: '6px',
-                          backgroundColor: 'white',
-                          fontSize: '14px',
-                          fontWeight: '500',
-                          color: '#374151',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          gap: '4px',
-                          cursor: 'pointer',
-                          transition: 'all 0.2s',
+                          height: "40px",
+                          minWidth: "80px",
+                          border: "1px solid #e2e8f0",
+                          borderRadius: "6px",
+                          backgroundColor: "white",
+                          fontSize: "14px",
+                          fontWeight: 500,
+                          color: "#374151",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          gap: "4px",
+                          cursor: "pointer",
+                          transition: "all 0.2s",
                         }}
                         dropdownStyleProps={{
                           style: {
                             zIndex: 1000,
-                            backgroundColor: 'white',
-                            border: '1px solid #e2e8f0',
-                            borderRadius: '8px',
-                            boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
-                            maxHeight: '200px',
-                            overflow: 'auto',
-                          }
+                            backgroundColor: "white",
+                            border: "1px solid #e2e8f0",
+                            borderRadius: "8px",
+                            boxShadow:
+                              "0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)",
+                            maxHeight: "260px",
+                            overflow: "auto",
+                          },
                         }}
                       />
                     </div>
-                    
+
                     {/* Phone Number Input */}
                     <div className="flex-1 relative">
                       <Phone className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
                       <Input
                         type="tel"
+                        inputMode="numeric"
                         placeholder="555XXXXXXX"
                         value={phoneNumber}
-                        onChange={(e) => setPhoneNumber(e.target.value)}
+                        onChange={(e) =>
+                          setPhoneNumber(e.target.value.replace(/\D/g, ""))
+                        }
                         className="pl-10 h-10 text-base border-gray-300 focus:border-blue-500 focus:ring-blue-500"
                       />
                     </div>
@@ -227,23 +260,31 @@ const HeroSection = ({ onVerificationComplete, isVerified }: HeroSectionProps) =
                 {/* Invisible reCAPTCHA anchor */}
                 <div ref={recaptchaRef} id="recaptcha-container" />
 
-                <Button
-                  onClick={handleSendCode}
-                  disabled={isSending}
-                  className="w-full bg-blue-600 hover:bg-blue-700 text-base sm:text-lg py-3 h-12 transition-all duration-200 shadow-lg hover:shadow-xl"
-                >
-                  {isSending ? "Sending..." : "Send Verification Code"}
-                </Button>
+                {/* Button - moved up by reducing spacing */}
+                <div className="mt-4">
+                  <Button
+                    onClick={handleSendCode}
+                    disabled={isSending}
+                    className="w-full bg-blue-600 hover:bg-blue-700 text-base sm:text-lg py-3 h-12 transition-all duration-200 shadow-lg hover:shadow-xl"
+                  >
+                    {isSending ? "Sending..." : "Send Verification Code"}
+                  </Button>
+                </div>
               </div>
             ) : (
               <div className="space-y-6">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-3 text-left">Verification Code</label>
+                  <label className="block text-md font-medium text-gray-700 mb-3 text-center">
+                    Verification Code
+                  </label>
                   <Input
                     type="text"
+                    inputMode="numeric"
                     placeholder="Enter 6-digit code"
                     value={verificationCode}
-                    onChange={(e) => setVerificationCode(e.target.value)}
+                    onChange={(e) =>
+                      setVerificationCode(e.target.value.replace(/\D/g, ""))
+                    }
                     className="text-center text-lg tracking-widest h-12 border-gray-300 focus:border-blue-500 focus:ring-blue-500"
                     maxLength={6}
                   />

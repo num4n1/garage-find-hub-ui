@@ -1,14 +1,8 @@
 import { collection, getDocs } from "firebase/firestore";
 import { db } from "@/lib/firebase";
+import { stableShuffleById } from "@/lib/sessionShuffle";
 
-function shuffleArray<T>(array: T[]): T[] {
-    return array
-      .map(value => ({ value, sort: Math.random() }))
-      .sort((a, b) => a.sort - b.sort)
-      .map(({ value }) => value);
-}
-
-export const fetchGaragesByService = async (service: string) => {
+export const fetchGaragesByService = async (service: string, seed: number) => {
   try {
     const ref = collection(db, service);
     const snapshot = await getDocs(ref);
@@ -16,9 +10,9 @@ export const fetchGaragesByService = async (service: string) => {
     const garages = snapshot.docs.map((doc) => ({
       id: doc.id,
       ...doc.data(),
-    }));
+    })) as Array<{ id: string; [key: string]: any }>;
 
-    return shuffleArray(garages);
+    return stableShuffleById(garages, seed);
   } catch (error) {
     console.error("Error fetching garages:", error);
     return [];

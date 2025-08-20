@@ -20,7 +20,16 @@ const Header = () => {
           {/* Logo */}
           <Link to="/" className="flex items-center space-x-2">
             <div className="bg-blue-600 p-2 rounded-lg">
-              <ScanSearch className="h-6 w-6 text-white" />
+              {/* <ScanSearch className="h-6 w-6 text-white" /> */}
+              <div className="h-6 w-6 text-white">
+                <img
+                  src="/assets/yallafinder_logo_square.svg"
+                  alt="YallaFinder"
+                  className="h-full w-full object-contain block"
+                  loading="eager"
+                  decoding="async"
+                />
+              </div>
             </div>
             <span className="text-xl font-bold text-blue-900">YallaFinder</span>
           </Link>

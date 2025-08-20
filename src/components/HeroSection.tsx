@@ -92,8 +92,8 @@ const HeroSection = ({ onVerificationComplete, isVerified }: HeroSectionProps) =
     return (
       <div className="text-center py-8 bg-gradient-to-r from-blue-600 to-blue-700 text-white">
         <div className="max-w-4xl mx-auto px-4">
-          <ScanSearch className="h-16 w-16 mx-auto mb-6 text-white" />
-          {/* <div className="mx-auto mb-6 h-20 w-20">
+          {/* <ScanSearch className="h-16 w-16 mx-auto mb-6 text-white" /> */}
+          <div className="mx-auto mb-6 h-20 w-20">
             <img
               src="/assets/yallafinder_logo_tight_square.svg"
               alt="YallaFinder"
@@ -101,7 +101,7 @@ const HeroSection = ({ onVerificationComplete, isVerified }: HeroSectionProps) =
               loading="eager"
               decoding="async"
             />
-          </div> */}
+          </div>
           <h1 className="text-3xl md:text-4xl font-bold mb-4">Find the Perfect Garage for Your Car</h1>
           <p className="text-xl text-blue-100">Discover trusted local garages for all your automotive needs</p>
         </div>

@@ -1,4 +1,4 @@
-import * as functions from "firebase-functions";
+import functions from "firebase-functions";
 import admin from "firebase-admin";
 import express from "express";
 import cors from "cors";
@@ -6,20 +6,14 @@ import CryptoJS from "crypto-js";
 import { RateLimiterMemory } from "rate-limiter-flexible";
 import sgMail from "@sendgrid/mail";
 
-// IMPORTANT: guarded init (prevents duplicate-app AND no-app)
-if (!admin.apps.length) {
-  admin.initializeApp();
-}
+admin.initializeApp();
 const db = admin.firestore();
-
-// keep your exports (note the .js extension with ESM)
-export { notifyWaitlist, notifyLaunch } from "./waitlist.js";
 
 // ---- Config (firebase functions:config:set ...) ----
 const SENDGRID_KEY = process.env.SENDGRID_KEY || functions.config().sg?.key;
-const SENDER       = process.env.SENDER   || functions.config().sg?.sender  || "no-reply@yallafinder.com";
-const REPLYTO      = process.env.REPLYTO  || functions.config().sg?.replyto || "support@yallafinder.com";
-const APP_NAME     = process.env.APP_NAME || functions.config().app?.name   || "YallaFinder";
+const SENDER     = process.env.SENDER   || functions.config().sg?.sender  || "no-reply@yallafinder.com";
+const REPLYTO    = process.env.REPLYTO  || functions.config().sg?.replyto || "support@yallafinder.com";
+const APP_NAME   = process.env.APP_NAME || functions.config().app?.name   || "YallaFinder";
 
 if (!SENDGRID_KEY) {
   console.warn('WARNING: No SendGrid key found. Set with: firebase functions:config:set sg.key="..."');
@@ -27,7 +21,6 @@ if (!SENDGRID_KEY) {
   sgMail.setApiKey(SENDGRID_KEY);
 }
 
-// ---- Express app ----
 const app = express();
 app.use(cors({ origin: true }));
 app.use(express.json());
@@ -51,10 +44,13 @@ const otpEmailHtml = ({
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
   <title>${appName} Verification Code</title>
   <style>
+    /* Bigger logo and ensure single-logo behavior */
     .logo-wrap { text-align:center; padding-bottom:18px; line-height:0; }
     .logo { display:block; height:48px; width:auto; margin:0 auto; border:0; outline:none; }
+    /* Default = light mode → show blue */
     .logo-light { display:block; }
     .logo-dark  { display:none;  }
+    /* Improve Outlook behavior if both ever render */
     .logo-dark { mso-hide:all; }
 
     .btn { background:${brand}; color:#fff; text-decoration:none; padding:12px 18px; border-radius:8px; display:inline-block; font-weight:600; }
@@ -64,12 +60,15 @@ const otpEmailHtml = ({
       .card { background:#111827 !important; color:#e5e7eb !important; }
       .muted{ color:#9ca3af !important; }
       .code { background:#0b1220 !important; color:#e5e7eb !important; border-color:#374151 !important; }
+
+      /* Dark mode → hide blue, show white */
       .logo-light { display:none !important; }
       .logo-dark  { display:block !important; }
     }
   </style>
 </head>
 <body style="margin:0;background:#f3f4f6;font-family:Inter,Segoe UI,Roboto,Helvetica,Arial,sans-serif;">
+  <!-- preheader (hidden preview text) -->
   <span style="display:none !important;opacity:0;color:transparent;height:0;width:0;overflow:hidden;">
     Your ${appName} code is ${code}. It expires in ${minutes} minutes.
   </span>
@@ -80,7 +79,9 @@ const otpEmailHtml = ({
         <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:560px;">
           <tr>
             <td class="logo-wrap">
+              <!-- Light-mode blue logo -->
               <img class="logo logo-light" src="${logoLightUrl}" alt="">
+              <!-- Dark-mode white logo -->
               <img class="logo logo-dark"  src="${logoDarkUrl}"  alt="">
             </td>
           </tr>
@@ -135,14 +136,14 @@ async function sendEmailOTP(to, code) {
     appName: APP_NAME,
     code,
     minutes: 10,
-    logoLightUrl: "https://yallafinder.com/assets/yallafinder_icon_96_blue.png",
-    logoDarkUrl:  "https://yallafinder.com/assets/yallafinder_icon_96.png",
+    logoLightUrl: "https://yallafinder.com/assets/yallafinder_icon_96_blue.png", // blue for light
+    logoDarkUrl:  "https://yallafinder.com/assets/yallafinder_icon_96.png",      // white for dark
     support: REPLYTO,
     brand: "#2563eb",
   });
 
   const msg = {
-    to: to,
+    to,
     from: { email: SENDER, name: APP_NAME },
     replyTo: REPLYTO,
     subject: `${APP_NAME} verification code: ${code}`,
@@ -154,9 +155,10 @@ async function sendEmailOTP(to, code) {
   return { ok: res.statusCode >= 200 && res.statusCode < 300, status: res.statusCode };
 }
 
+
 // --- rate limits ---
-const limiterSend   = new RateLimiterMemory({ points: 5,  duration: 300 }); // 5 sends/5min per email
-const limiterVerify = new RateLimiterMemory({ points: 10, duration: 300 }); // 10 verify attempts/5min
+const limiterSend = new RateLimiterMemory({ points: 5, duration: 300 });   // 3 sends per 5 min per email
+const limiterVerify = new RateLimiterMemory({ points: 10, duration: 300 }); // 10 verify attempts per 5 min
 
 /**
  * POST /email/send
@@ -166,8 +168,7 @@ app.post("/email/send", async (req, res) => {
   try {
     const { email } = req.body || {};
     if (!email || !/^\S+@\S+\.\S+$/.test(email)) {
-      res.status(400).json({ ok: false, error: "Invalid email" });
-      return;
+      return res.status(400).json({ ok: false, error: "Invalid email" });
     }
     await limiterSend.consume(email);
 
@@ -177,24 +178,25 @@ app.post("/email/send", async (req, res) => {
     await db.collection("email_otps").doc(email).set({
       codeHash,
       attempts: 0,
-      expiresAt: expiresAt(10),
+      expiresAt: expiresAt(10), // 10-minute TTL
       createdAt: admin.firestore.FieldValue.serverTimestamp(),
     });
 
     const r = await sendEmailOTP(email, code);
     if (!r.ok) {
-      console.error("SendGrid error status:", r.status);
-      res.status(502).json({ ok: false, error: "Email send failed" });
-      return;
+      if (r.overQuota) {
+        return res.status(429).json({ ok: false, error: "Email send limit reached. Please try again later." });
+      }
+      console.error("SendGrid error:", r.status, r.details);
+      return res.status(502).json({ ok: false, error: "Email send failed" });
     }
-    res.json({ ok: true });
+    return res.json({ ok: true });
   } catch (e) {
-    if (e && typeof e === "object" && "remainingPoints" in e) {
-      res.status(429).json({ ok: false, error: "Too many requests" });
-      return;
+    if (e.remainingPoints !== undefined) {
+      return res.status(429).json({ ok: false, error: "Too many requests" });
     }
     console.error(e);
-    res.status(500).json({ ok: false, error: "Server error" });
+    return res.status(500).json({ ok: false, error: "Server error" });
   }
 });
 
@@ -207,36 +209,28 @@ app.post("/email/verify", async (req, res) => {
   try {
     const { email, code } = req.body || {};
     if (!email || !/^\S+@\S+\.\S+$/.test(email) || !/^\d{6}$/.test(code)) {
-      res.status(400).json({ ok: false, error: "Invalid input" });
-      return;
+      return res.status(400).json({ ok: false, error: "Invalid input" });
     }
     await limiterVerify.consume(email);
 
     const ref = db.collection("email_otps").doc(email);
     const snap = await ref.get();
-    if (!snap.exists) {
-      res.status(400).json({ ok: false, error: "No code. Send again." });
-      return;
-    }
+    if (!snap.exists) return res.status(400).json({ ok: false, error: "No code. Send again." });
 
-    const data = snap.data() || {};
-    const { codeHash, attempts = 0, expiresAt: exp } = data;
+    const { codeHash, attempts = 0, expiresAt: exp } = snap.data();
     const now = admin.firestore.Timestamp.now();
     if (exp && now.toMillis() > exp.toMillis()) {
       await ref.delete();
-      res.status(400).json({ ok: false, error: "Code expired" });
-      return;
+      return res.status(400).json({ ok: false, error: "Code expired" });
     }
     if (attempts >= 5) {
       await ref.delete();
-      res.status(400).json({ ok: false, error: "Too many attempts" });
-      return;
+      return res.status(400).json({ ok: false, error: "Too many attempts" });
     }
 
     if (hashCode(code) !== codeHash) {
       await ref.update({ attempts: attempts + 1 });
-      res.status(400).json({ ok: false, error: "Incorrect code" });
-      return;
+      return res.status(400).json({ ok: false, error: "Incorrect code" });
     }
 
     // Create/fetch user, mark emailVerified, mint custom token
@@ -252,16 +246,14 @@ app.post("/email/verify", async (req, res) => {
     const customToken = await admin.auth().createCustomToken(user.uid);
 
     await ref.delete(); // cleanup
-    res.json({ ok: true, customToken });
+    return res.json({ ok: true, customToken });
   } catch (e) {
-    if (e && typeof e === "object" && "remainingPoints" in e) {
-      res.status(429).json({ ok: false, error: "Too many requests" });
-      return;
+    if (e.remainingPoints !== undefined) {
+      return res.status(429).json({ ok: false, error: "Too many requests" });
     }
     console.error(e);
-    res.status(500).json({ ok: false, error: "Server error" });
+    return res.status(500).json({ ok: false, error: "Server error" });
   }
 });
 
-// Export the Express API
 export const api = functions.https.onRequest(app);

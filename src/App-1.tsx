@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "@/lib/firebase";
-import "react-international-phone/style.css";
+import 'react-international-phone/style.css';
 
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -15,19 +15,8 @@ import Contact from "./pages/Contact";
 import AdminAnalytics from "./pages/AdminAnalytics";
 import NotFound from "./pages/NotFound";
 import HeroSection from "@/components/HeroSection";
-import ComingSoon from "@/components/ComingSoon";
 
 const queryClient = new QueryClient();
-
-// Launch date (UTC): Oct 10, 2025 00:00:00
-const LAUNCH_TS = Date.UTC(2025, 9, 10, 0, 0, 0);
-const BYPASS_KEY = "yf_admin_bypass";
-
-function shouldShowComingSoon() {
-  if (typeof window === "undefined") return true;
-  const bypass = localStorage.getItem(BYPASS_KEY) === "1";
-  return !bypass && Date.now() < LAUNCH_TS;
-}
 
 const App = () => {
   const [isVerified, setIsVerified] = useState(false);
@@ -38,6 +27,7 @@ const App = () => {
       setIsVerified(!!user);
       setCheckingAuth(false);
     });
+
     return () => unsubscribe();
   }, []);
 
@@ -55,9 +45,7 @@ const App = () => {
             <Route
               path="/"
               element={
-                shouldShowComingSoon() ? (
-                  <ComingSoon />
-                ) : isVerified ? (
+                isVerified ? (
                   <Index />
                 ) : (
                   <HeroSection
@@ -67,10 +55,10 @@ const App = () => {
                 )
               }
             />
-            <Route path="/about" element={<About />} />
-            <Route path="/contact" element={<Contact />} />
-            <Route path="/adminanalytics" element={<AdminAnalytics />} />
-            <Route path="*" element={<NotFound />} />
+          <Route path="/about" element={<About />} />
+          <Route path="/contact" element={<Contact />} />
+          <Route path="/adminanalytics" element={<AdminAnalytics />} />
+          <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
       </TooltipProvider>

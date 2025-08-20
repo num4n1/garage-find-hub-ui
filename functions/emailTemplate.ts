@@ -1,19 +1,24 @@
-// functions/emailTemplate.ts
+import fs from "fs";
+import path from "path";
+
 export function otpEmailHtml({
   appName,
   code,              // "123456"
   minutes = 10,
-  logoUrl = "https://yallafinder.com/assets/yallafinder_icon_96.png",
   brand = "#2563eb", // Tailwind "blue-600"
   support = "support@yallafinder.com",
 }: {
   appName: string;
   code: string;
   minutes?: number;
-  logoUrl?: string;
   brand?: string;
   support?: string;
 }) {
+  // read the logo from your repo
+  const filePath = path.join(process.cwd(), "public/assets/yallafinder_icon_96.png");
+  const base64Logo = fs.readFileSync(filePath).toString("base64");
+  const logoUrl = `data:image/png;base64,${base64Logo}`;
+
   // Keep styles inline / <style> minimal for Outlook compatibility
   return `
 <!doctype html>
@@ -42,7 +47,7 @@ export function otpEmailHtml({
         <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:560px;">
           <tr>
             <td style="text-align:center;padding-bottom:18px;">
-              ${logoUrl ? `<img src="${logoUrl}" alt="${appName}" height="36" style="display:inline-block;border:0;outline:none;">` : `<div style="font-weight:800;font-size:20px;color:${brand}">${appName}</div>`}
+              <img src="${logoUrl}" alt="${appName}" height="36" style="display:inline-block;border:0;outline:none;" />
             </td>
           </tr>
           <tr>

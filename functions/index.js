@@ -121,7 +121,7 @@ async function sendEmailOTP(to, code) {
     code,
     minutes: 10,
     // swap this to your actual hosted logo or remove to use text brand
-    logoUrl: "https://yallafinder.com/logo.png",
+    logoUrl: "https://yallafinder.com/assets/yallafinder_icon_96.png",
     support: REPLYTO,
     brand: "#2563eb",
   });

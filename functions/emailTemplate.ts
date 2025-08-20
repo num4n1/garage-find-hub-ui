@@ -1,6 +1,4 @@
-import fs from "fs";
-import path from "path";
-
+// functions/emailTemplate.ts
 export function otpEmailHtml({
   appName,
   code,              // "123456"
@@ -14,11 +12,6 @@ export function otpEmailHtml({
   brand?: string;
   support?: string;
 }) {
-  // read the logo from your repo
-  const filePath = path.join(process.cwd(), "public/assets/yallafinder_icon_96.png");
-  const base64Logo = fs.readFileSync(filePath).toString("base64");
-  const logoUrl = `data:image/png;base64,${base64Logo}`;
-
   // Keep styles inline / <style> minimal for Outlook compatibility
   return `
 <!doctype html>
@@ -45,11 +38,6 @@ export function otpEmailHtml({
     <tr>
       <td align="center">
         <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:560px;">
-          <tr>
-            <td style="text-align:center;padding-bottom:18px;">
-              <img src="${logoUrl}" alt="${appName}" height="36" style="display:inline-block;border:0;outline:none;" />
-            </td>
-          </tr>
           <tr>
             <td class="card" style="background:#ffffff;border-radius:14px;padding:32px;box-shadow:0 8px 20px rgba(0,0,0,0.06);">
               <h1 style="margin:0 0 6px;font-size:20px;line-height:1.4;color:#111827;text-align:center;">Here is your One-Time Password</h1>

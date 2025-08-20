@@ -256,4 +256,65 @@ app.post("/email/verify", async (req, res) => {
   }
 });
 
+const limiterContact = new RateLimiterMemory({ points: 5, duration: 300 });
+
+app.post("/contact/send", async (req, res) => {
+  try {
+    const { name = "", email = "", phone = "", message = "", website = "" } = req.body || {};
+
+    // Honeypot check
+    if (website && typeof website === "string" && website.trim().length > 0) {
+      res.status(200).json({ ok: true }); // pretend success for bots
+      return;
+    }
+
+    // Basic validation
+    if (!/^\S+@\S+\.\S+$/.test(email) || String(name).trim().length < 2 || String(message).trim().length < 5) {
+      res.status(400).json({ ok: false, error: "Invalid input" });
+      return;
+    }
+
+    // rate limit by email
+    await limiterContact.consume(email.toLowerCase());
+
+    // Email support@yallafinder.com
+    const to = "support@yallafinder.com";
+    const safe = (s) => String(s ?? "").toString().slice(0, 4000);
+
+    const html = `
+      <div style="font-family:Inter,Segoe UI,system-ui,sans-serif;font-size:14px;color:#111">
+        <h2 style="margin:0 0 8px">${APP_NAME} — New Contact Message</h2>
+        <p><strong>Name:</strong> ${safe(name)}</p>
+        <p><strong>Email:</strong> ${safe(email)}</p>
+        <p><strong>Phone:</strong> ${safe(phone)}</p>
+        <p style="margin-top:12px"><strong>Message:</strong><br/>${safe(message).replace(/\n/g, "<br/>")}</p>
+      </div>
+    `;
+
+    if (!SENDGRID_KEY) {
+      console.warn("No SENDGRID_KEY set; skipping email send for contact form");
+      res.status(200).json({ ok: true, note: "email skipped (no key)" });
+      return;
+    }
+
+    await sgMail.send({
+      to,
+      from: { email: SENDER, name: APP_NAME },
+      replyTo: email, // so you can reply directly
+      subject: `[${APP_NAME}] Contact: ${safe(name)}`,
+      html,
+    });
+
+    res.json({ ok: true });
+  } catch (e) {
+    if (e && typeof e === "object" && "remainingPoints" in e) {
+      res.status(429).json({ ok: false, error: "Too many requests" });
+      return;
+    }
+    console.error(e);
+    res.status(500).json({ ok: false, error: "Server error" });
+  }
+});
+
+
 export const api = functions.https.onRequest(app);

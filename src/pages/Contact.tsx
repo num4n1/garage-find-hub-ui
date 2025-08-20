@@ -1,11 +1,58 @@
-
-import { Mail, Phone, MapPin, MessageCircle, ScanSearch } from "lucide-react";
+import { useState } from "react";
+import { Mail, Phone, MapPin, MessageCircle } from "lucide-react";
 import Header from "@/components/Header";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useToast } from "@/hooks/use-toast";
+
+const API_BASE = import.meta.env.VITE_API_BASE; // e.g. https://<region>-<proj>.cloudfunctions.net
 
 const Contact = () => {
+  const { toast } = useToast();
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
+  const [message, setMessage] = useState("");
+  const [bot, setBot] = useState(""); // honeypot
+  const [sending, setSending] = useState(false);
+
+  const validate = () => {
+    if (bot) return false;
+    if (!name || name.trim().length < 2) return false;
+    if (!/^\S+@\S+\.\S+$/.test(email)) return false;
+    if (!message || message.trim().length < 5) return false;
+    return true;
+  };
+
+  const onSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!API_BASE) {
+      toast({ title: "Not configured", description: "VITE_API_BASE is missing", variant: "destructive" });
+      return;
+    }
+    if (!validate()) {
+      toast({ title: "Check your info", description: "Please fill in required fields correctly.", variant: "destructive" });
+      return;
+    }
+    setSending(true);
+    try {
+      const res = await fetch(`${API_BASE}/contact/send`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, email, phone, message }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || data?.ok === false) throw new Error(data?.error || `HTTP ${res.status}`);
+      toast({ title: "Message sent ✅", description: "We’ll get back to you soon." });
+      setName(""); setEmail(""); setPhone(""); setMessage("");
+    } catch (err: any) {
+      toast({ title: "Send failed", description: err?.message || "Please try again later.", variant: "destructive" });
+    } finally {
+      setSending(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-blue-100">
       <Header />
@@ -27,7 +74,7 @@ const Contact = () => {
                 </div>
                 <div>
                   <h3 className="font-semibold text-blue-900 text-sm md:text-base">24/7 Support</h3>
-                  <p className="text-gray-600 text-sm md:text-base">+971 (56) 862-2370</p>
+                  <p className="text-gray-600 text-sm md:text-base">Coming soon!</p>
                 </div>
               </div>
 
@@ -37,7 +84,7 @@ const Contact = () => {
                 </div>
                 <div>
                   <h3 className="font-semibold text-blue-900 text-sm md:text-base">Email Us</h3>
-                  <p className="text-gray-600 text-sm md:text-base break-all">support@YallaFinder.com</p>
+                  <p className="text-gray-600 text-sm md:text-base break-all">support@yallafinder.com</p>
                 </div>
               </div>
 
@@ -66,48 +113,51 @@ const Contact = () => {
           {/* Contact Form Section */}
           <div className="bg-white rounded-xl md:rounded-2xl shadow-xl p-6 md:p-8">
             <h2 className="text-xl md:text-2xl font-bold text-blue-900 mb-6 text-center lg:text-left">Send us a Message</h2>
-            <form className="space-y-4 md:space-y-6">
+
+            <form className="space-y-4 md:space-y-6" onSubmit={onSubmit}>
+              {/* Honeypot (hidden) */}
+              <input
+                type="text"
+                value={bot}
+                onChange={(e) => setBot(e.target.value)}
+                className="hidden"
+                aria-hidden="true"
+                tabIndex={-1}
+                autoComplete="off"
+              />
+
               <div>
                 <Label htmlFor="name" className="text-sm md:text-base">Name</Label>
-                <Input 
-                  id="name" 
-                  placeholder="Your full name" 
-                  className="mt-1 h-10 md:h-11 text-sm md:text-base" 
-                />
+                <Input id="name" placeholder="Full name" className="mt-1 h-10 md:h-11 text-sm md:text-base"
+                  value={name} onChange={(e) => setName(e.target.value)} />
               </div>
-              
+
               <div>
                 <Label htmlFor="email" className="text-sm md:text-base">Email</Label>
-                <Input 
-                  id="email" 
-                  type="email" 
-                  placeholder="your.email@example.com" 
-                  className="mt-1 h-10 md:h-11 text-sm md:text-base" 
-                />
+                <Input id="email" type="email" placeholder="you@example.com" className="mt-1 h-10 md:h-11 text-sm md:text-base"
+                  value={email} onChange={(e) => setEmail(e.target.value)} />
               </div>
-              
+
               <div>
-                <Label htmlFor="phone" className="text-sm md:text-base">Phone Number</Label>
-                <Input 
-                  id="phone" 
-                  type="tel" 
-                  placeholder="+971-5X-XXX-XXXX" 
-                  className="mt-1 h-10 md:h-11 text-sm md:text-base" 
-                />
+                <Label htmlFor="phone" className="text-sm md:text-base">Phone Number (optional)</Label>
+                <Input id="phone" type="tel" placeholder="+1 555 555 5555" className="mt-1 h-10 md:h-11 text-sm md:text-base"
+                  value={phone} onChange={(e) => setPhone(e.target.value)} />
               </div>
-              
+
               <div>
                 <Label htmlFor="message" className="text-sm md:text-base">Message</Label>
-                <textarea 
-                  id="message" 
+                <textarea
+                  id="message"
                   placeholder="How can we help you?"
                   className="w-full mt-1 px-3 py-2 md:px-4 md:py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none text-sm md:text-base"
                   rows={4}
+                  value={message}
+                  onChange={(e) => setMessage(e.target.value)}
                 />
               </div>
-              
-              <Button className="w-full bg-blue-600 hover:bg-blue-700 text-base md:text-lg py-3 md:py-3.5 transition-colors">
-                Send Message
+
+              <Button type="submit" disabled={sending} className="w-full bg-blue-600 hover:bg-blue-700 text-base md:text-lg py-3 md:py-3.5 transition-colors">
+                {sending ? "Sending..." : "Send Message"}
               </Button>
             </form>
           </div>

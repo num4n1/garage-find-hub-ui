@@ -33,7 +33,7 @@ const otpEmailHtml = ({
   appName,
   code,             // "123456"
   minutes = 10,
-  logoUrl = "https://yallafinder.com/logo.png", 
+  logoUrl = "https://yallafinder.com/assets/yallafinder_icon_96.png", 
   brand = "#2563eb",
   support = REPLYTO,
 }) => `<!doctype html>

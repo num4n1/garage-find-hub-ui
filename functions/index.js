@@ -33,7 +33,9 @@ const otpEmailHtml = ({
   appName,
   code,             // "123456"
   minutes = 10,
-  logoUrl = "https://yallafinder.com/assets/yallafinder_icon_96.png", 
+  // ⬇️ set your light + dark logo URLs here
+  logoLightUrl = "https://yallafinder.com/assets/yallafinder_icon_96_blue.png",
+  logoDarkUrl  = "https://yallafinder.com/assets/yallafinder_icon_96.png", // white version
   brand = "#2563eb",
   support = REPLYTO,
 }) => `<!doctype html>
@@ -43,12 +45,23 @@ const otpEmailHtml = ({
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
   <title>${appName} Verification Code</title>
   <style>
+    /* make the logo a bit bigger */
+    .logo { height:44px; line-height:44px; vertical-align:middle; }
+    /* default (light mode) shows blue logo */
+    .logo-light { display:inline-block; }
+    .logo-dark  { display:none; }
+
     .btn { background:${brand}; color:#fff; text-decoration:none; padding:12px 18px; border-radius:8px; display:inline-block; font-weight:600; }
+
     @media (prefers-color-scheme: dark) {
-      body { background:#0b1220 !important; }
+      body  { background:#0b1220 !important; }
       .card { background:#111827 !important; color:#e5e7eb !important; }
-      .muted { color:#9ca3af !important; }
+      .muted{ color:#9ca3af !important; }
       .code { background:#0b1220 !important; color:#e5e7eb !important; border-color:#374151 !important; }
+
+      /* in dark mode, hide blue logo and show white one */
+      .logo-light { display:none !important; }
+      .logo-dark  { display:inline-block !important; }
     }
   </style>
 </head>
@@ -64,9 +77,10 @@ const otpEmailHtml = ({
         <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:560px;">
           <tr>
             <td style="text-align:center;padding-bottom:18px;">
-              ${logoUrl
-                ? `<img src="${logoUrl}" alt="${appName}" height="36" style="display:inline-block;border:0;outline:none;">`
-                : `<div style="font-weight:800;font-size:20px;color:${brand}">${appName}</div>`}
+              <!-- Light-mode blue logo -->
+              <img class="logo logo-light" src="${logoLightUrl}" alt="" style="display:inline-block;border:0;outline:none;">
+              <!-- Dark-mode white logo -->
+              <img class="logo logo-dark"  src="${logoDarkUrl}"  alt="" style="display:inline-block;border:0;outline:none;">
             </td>
           </tr>
 

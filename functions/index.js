@@ -9,12 +9,11 @@ import sgMail from "@sendgrid/mail";
 admin.initializeApp();
 const db = admin.firestore();
 
-// ---- Config from Firebase Functions runtime config ----
-//   firebase functions:config:set sg.key="SG.xxxx" sg.sender="no-reply@yallafinder.com" sg.replyto="support@yallafinder.com" app.name="YallaFinder"
+// ---- Config (firebase functions:config:set ...) ----
 const SENDGRID_KEY = process.env.SENDGRID_KEY || functions.config().sg?.key;
-const SENDER = process.env.SENDER || functions.config().sg?.sender || "no-reply@yallafinder.com";
-const REPLYTO = process.env.REPLYTO || functions.config().sg?.replyto || "support@yallafinder.com";
-const APP_NAME = process.env.APP_NAME || functions.config().app?.name || "YallaFinder";
+const SENDER     = process.env.SENDER   || functions.config().sg?.sender  || "no-reply@yallafinder.com";
+const REPLYTO    = process.env.REPLYTO  || functions.config().sg?.replyto || "support@yallafinder.com";
+const APP_NAME   = process.env.APP_NAME || functions.config().app?.name   || "YallaFinder";
 
 if (!SENDGRID_KEY) {
   console.warn('WARNING: No SendGrid key found. Set with: firebase functions:config:set sg.key="..."');
@@ -33,9 +32,9 @@ const otpEmailHtml = ({
   appName,
   code,             // "123456"
   minutes = 10,
-  // ⬇️ set your light + dark logo URLs here
+  // light mode = blue; dark mode = white
   logoLightUrl = "https://yallafinder.com/assets/yallafinder_icon_96_blue.png",
-  logoDarkUrl  = "https://yallafinder.com/assets/yallafinder_icon_96.png", // white version
+  logoDarkUrl  = "https://yallafinder.com/assets/yallafinder_icon_96.png",
   brand = "#2563eb",
   support = REPLYTO,
 }) => `<!doctype html>
@@ -45,11 +44,14 @@ const otpEmailHtml = ({
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
   <title>${appName} Verification Code</title>
   <style>
-    /* make the logo a bit bigger */
-    .logo { height:44px; line-height:44px; vertical-align:middle; }
-    /* default (light mode) shows blue logo */
-    .logo-light { display:inline-block; }
-    .logo-dark  { display:none; }
+    /* Bigger logo and ensure single-logo behavior */
+    .logo-wrap { text-align:center; padding-bottom:18px; line-height:0; }
+    .logo { display:block; height:48px; width:auto; margin:0 auto; border:0; outline:none; }
+    /* Default = light mode → show blue */
+    .logo-light { display:block; }
+    .logo-dark  { display:none;  }
+    /* Improve Outlook behavior if both ever render */
+    .logo-dark { mso-hide:all; }
 
     .btn { background:${brand}; color:#fff; text-decoration:none; padding:12px 18px; border-radius:8px; display:inline-block; font-weight:600; }
 
@@ -59,9 +61,9 @@ const otpEmailHtml = ({
       .muted{ color:#9ca3af !important; }
       .code { background:#0b1220 !important; color:#e5e7eb !important; border-color:#374151 !important; }
 
-      /* in dark mode, hide blue logo and show white one */
+      /* Dark mode → hide blue, show white */
       .logo-light { display:none !important; }
-      .logo-dark  { display:inline-block !important; }
+      .logo-dark  { display:block !important; }
     }
   </style>
 </head>
@@ -76,11 +78,11 @@ const otpEmailHtml = ({
       <td align="center">
         <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:560px;">
           <tr>
-            <td style="text-align:center;padding-bottom:18px;">
+            <td class="logo-wrap">
               <!-- Light-mode blue logo -->
-              <img class="logo logo-light" src="${logoLightUrl}" alt="" style="display:inline-block;border:0;outline:none;">
+              <img class="logo logo-light" src="${logoLightUrl}" alt="">
               <!-- Dark-mode white logo -->
-              <img class="logo logo-dark"  src="${logoDarkUrl}"  alt="" style="display:inline-block;border:0;outline:none;">
+              <img class="logo logo-dark"  src="${logoDarkUrl}"  alt="">
             </td>
           </tr>
 
@@ -134,8 +136,8 @@ async function sendEmailOTP(to, code) {
     appName: APP_NAME,
     code,
     minutes: 10,
-    // swap this to your actual hosted logo or remove to use text brand
-    logoUrl: "https://yallafinder.com/assets/yallafinder_icon_96.png",
+    logoLightUrl: "https://yallafinder.com/assets/yallafinder_icon_96_blue.png", // blue for light
+    logoDarkUrl:  "https://yallafinder.com/assets/yallafinder_icon_96.png",      // white for dark
     support: REPLYTO,
     brand: "#2563eb",
   });
@@ -145,24 +147,17 @@ async function sendEmailOTP(to, code) {
     from: { email: SENDER, name: APP_NAME },
     replyTo: REPLYTO,
     subject: `${APP_NAME} verification code: ${code}`,
-    // Keep a plain-text version for deliverability and accessibility
-    text: `Your ${APP_NAME} code is ${code}. It expires in 10 minutes. If you didn’t request it, ignore this email.`,
+    text: `Your ${APP_NAME} code is ${code}. It expires in 10 minutes. If you didn't request it, ignore this email.`,
     html,
   };
 
-  try {
-    const [res] = await sgMail.send(msg);
-    return { ok: res.statusCode >= 200 && res.statusCode < 300, status: res.statusCode };
-  } catch (e) {
-    const status = e?.code || e?.response?.statusCode || 500;
-    const details = e?.response?.body?.errors?.map((x) => x.message).join("; ") || e?.message;
-    const overQuota = status === 429 || /limit|exceed|quota|credit/i.test(details || "");
-    return { ok: false, status, overQuota, details };
-  }
+  const [res] = await sgMail.send(msg);
+  return { ok: res.statusCode >= 200 && res.statusCode < 300, status: res.statusCode };
 }
 
+
 // --- rate limits ---
-const limiterSend = new RateLimiterMemory({ points: 3, duration: 300 });   // 3 sends per 5 min per email
+const limiterSend = new RateLimiterMemory({ points: 5, duration: 300 });   // 3 sends per 5 min per email
 const limiterVerify = new RateLimiterMemory({ points: 10, duration: 300 }); // 10 verify attempts per 5 min
 
 /**

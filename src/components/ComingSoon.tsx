@@ -6,7 +6,7 @@ import { useToast } from "@/hooks/use-toast";
 import { db } from "@/lib/firebase";
 import { addDoc, collection, serverTimestamp } from "firebase/firestore";
 
-const LAUNCH_TS = Date.UTC(2025, 9, 10, 0, 0, 0); // Oct 10, 2025 (UTC)
+const LAUNCH_TS = Date.UTC(2025, 9, 1, 0, 0, 0); // Oct 1, 2025 (UTC)
 const ADMIN_PASS = "Admin2025$";
 const BYPASS_KEY = "yf_admin_bypass";
 const API_BASE = import.meta.env.VITE_API_BASE; // e.g. https://...cloudfunctions.net/api
@@ -190,7 +190,7 @@ export default function ComingSoon() {
           </div>
 
           <div className="mt-12 text-blue-200/80 text-xs">
-            Launching on <span className="font-semibold">October 10, 2025</span>
+            Launching on <span className="font-semibold">October 1st, 2025</span>
           </div>
         </div>
       </main>

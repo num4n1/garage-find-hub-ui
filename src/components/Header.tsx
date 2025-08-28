@@ -59,7 +59,7 @@ const Header = () => {
               <Sheet>
                 <SheetTrigger asChild>
                   <button className="p-2 hover:bg-accent rounded-md transition-colors">
-                    <Menu className="h-6 w-6 text-primary" />
+                    <Menu className="h-6 w-6 text-blue-900" />
                   </button>
                 </SheetTrigger>
                 <SheetContent side="right" className="w-64">

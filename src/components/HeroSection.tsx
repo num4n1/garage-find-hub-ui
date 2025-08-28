@@ -103,7 +103,7 @@ const HeroSection = ({ onVerificationComplete, isVerified }: HeroSectionProps) =
             />
           </div>
           <h1 className="text-3xl md:text-4xl font-bold mb-4">Find the Perfect Garage for Your Car</h1>
-          <p className="text-xl text-blue-100">Discover trusted local garages for all your automotive needs</p>
+          <p className="text-xl text-blue-100">Discover trusted garages for all your automotive needs in Dubai</p>
         </div>
       </div>
     );

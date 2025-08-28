@@ -4,10 +4,9 @@ import { Button } from "@/components/ui/button";
 import { Mail, Shield } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { db } from "@/lib/firebase";
-import { addDoc, collection, serverTimestamp } from "firebase/firestore";
+import { addDoc, collection, serverTimestamp, doc, getDoc } from "firebase/firestore";
 
 const LAUNCH_TS = Date.UTC(2025, 9, 1, 0, 0, 0); // Oct 1, 2025 (UTC)
-const ADMIN_PASS = "Admin2025$";
 const BYPASS_KEY = "yf_admin_bypass";
 const API_BASE = import.meta.env.VITE_API_BASE; // e.g. https://...cloudfunctions.net/api
 
@@ -76,15 +75,24 @@ export default function ComingSoon() {
     }
   };
 
-  const tryAdmin = () => {
+  const tryAdmin = async () => {
     setAdminErr("");
-    if (adminPwd === ADMIN_PASS) {
-      localStorage.setItem(BYPASS_KEY, "1");
-      window.location.reload();
-    } else {
-      setAdminErr("Incorrect password");
+    try {
+      const snap = await getDoc(doc(db, "Password", "Admin"));
+      const expected = snap.exists() ? (snap.data() as any)?.password : undefined;
+      if (!expected) throw new Error("Password not configured");
+
+      if (adminPwd === expected) {
+        localStorage.setItem(BYPASS_KEY, "1");
+        window.location.reload();
+      } else {
+        setAdminErr("Incorrect password");
+      }
+    } catch (e: any) {
+      setAdminErr(e?.message || "Failed to verify");
     }
   };
+
 
   return (
     <div className="relative min-h-screen text-white overflow-hidden">

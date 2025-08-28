@@ -42,8 +42,24 @@ const App = () => {
   }, []);
 
   if (checkingAuth) {
-    return <div className="text-white text-center p-10">Checking authentication...</div>;
+    return (
+      <div className="text-white text-center p-10">
+        Checking authentication...
+      </div>
+    );
   }
+
+  // Reusable element for "/" and "/services/:serviceId"
+  const HomeElement = shouldShowComingSoon() ? (
+    <ComingSoon />
+  ) : isVerified ? (
+    <Index />
+  ) : (
+    <HeroSection
+      onVerificationComplete={() => setIsVerified(true)}
+      isVerified={false}
+    />
+  );
 
   return (
     <QueryClientProvider client={queryClient}>
@@ -52,21 +68,8 @@ const App = () => {
         <Sonner />
         <BrowserRouter>
           <Routes>
-            <Route
-              path="/"
-              element={
-                shouldShowComingSoon() ? (
-                  <ComingSoon />
-                ) : isVerified ? (
-                  <Index />
-                ) : (
-                  <HeroSection
-                    onVerificationComplete={() => setIsVerified(true)}
-                    isVerified={false}
-                  />
-                )
-              }
-            />
+            <Route path="/" element={HomeElement} />
+            <Route path="/services/:serviceId" element={HomeElement} />
             <Route path="/about" element={<About />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/adminanalytics" element={<AdminAnalytics />} />

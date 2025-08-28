@@ -1,4 +1,3 @@
-
 import { Phone, MapPin, Menu, ScanSearch } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
@@ -10,13 +9,14 @@ const Header = () => {
 
   const linkClasses = (path: string) =>
     location.pathname === path
-      ? "text-primary font-medium"
-      : "text-muted-foreground hover:text-primary font-medium transition-colors";
+      ? "text-blue-900 font-bold"
+      : "text-muted-foreground hover:text-blue-900 font-medium transition-colors";
   
   return (
     <header className="bg-white shadow-sm border-b border-blue-100">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
+        {/* added relative so we can absolutely center the nav */}
+        <div className="flex justify-between items-center h-16 relative">
           {/* Logo */}
           <Link to="/" className="flex items-center space-x-2">
             <div className="bg-blue-600 p-2 rounded-lg">
@@ -34,8 +34,8 @@ const Header = () => {
             <span className="text-xl font-bold text-blue-900">YallaFinder</span>
           </Link>
 
-          {/* Desktop Navigation */}
-          <nav className="hidden md:flex space-x-8">
+          {/* Desktop Navigation — centered horizontally */}
+          <nav className="hidden md:flex space-x-8 absolute left-1/2 -translate-x-1/2">
             <Link to="/" className={linkClasses("/")}>
               Home
             </Link>
@@ -50,8 +50,8 @@ const Header = () => {
           <div className="flex items-center space-x-4">
             {/* Contact Info */}
             <div className="hidden sm:flex items-center space-x-2 text-primary">
-              <Phone className="h-4 w-4" />
-              <span className="text-sm font-medium">24/7 Support</span>
+              <Phone className="h-4 w-4 text-blue-900" />
+              <span className="text-sm font-medium text-blue-900">24/7 Support</span>
             </div>
 
             {/* Mobile Menu */}
@@ -59,7 +59,7 @@ const Header = () => {
               <Sheet>
                 <SheetTrigger asChild>
                   <button className="p-2 hover:bg-accent rounded-md transition-colors">
-                    <Menu className="h-6 w-6 text-primary" />
+                    <Menu className="h-6 w-6 text-blue-900" />
                   </button>
                 </SheetTrigger>
                 <SheetContent side="right" className="w-64">
@@ -84,8 +84,8 @@ const Header = () => {
                     </Link>
                     <div className="pt-4 border-t border-border">
                       <div className="flex items-center space-x-2 text-primary">
-                        <Phone className="h-4 w-4" />
-                        <span className="text-sm font-medium">24/7 Support</span>
+                        <Phone className="h-4 w-4 text-blue-900" />
+                        <span className="text-sm font-medium text-blue-900">24/7 Support</span>
                       </div>
                     </div>
                   </nav>

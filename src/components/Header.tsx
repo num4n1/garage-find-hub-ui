@@ -9,7 +9,7 @@ const Header = () => {
 
   const linkClasses = (path: string) =>
     location.pathname === path
-      ? "text-blue-900 font-medium"
+      ? "text-blue-900 font-bold"
       : "text-muted-foreground hover:text-blue-900 font-medium transition-colors";
   
   return (
@@ -50,8 +50,8 @@ const Header = () => {
           <div className="flex items-center space-x-4">
             {/* Contact Info */}
             <div className="hidden sm:flex items-center space-x-2 text-primary">
-              <Phone className="h-4 w-4" />
-              <span className="text-sm font-medium">24/7 Support</span>
+              <Phone className="h-4 w-4 text-blue-900" />
+              <span className="text-sm font-medium text-blue-900">24/7 Support</span>
             </div>
 
             {/* Mobile Menu */}
@@ -84,8 +84,8 @@ const Header = () => {
                     </Link>
                     <div className="pt-4 border-t border-border">
                       <div className="flex items-center space-x-2 text-primary">
-                        <Phone className="h-4 w-4" />
-                        <span className="text-sm font-medium">24/7 Support</span>
+                        <Phone className="h-4 w-4 text-blue-900" />
+                        <span className="text-sm font-medium text-blue-900">24/7 Support</span>
                       </div>
                     </div>
                   </nav>

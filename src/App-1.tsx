@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "@/lib/firebase";
-import 'react-international-phone/style.css';
+import "react-international-phone/style.css";
 
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -32,8 +32,21 @@ const App = () => {
   }, []);
 
   if (checkingAuth) {
-    return <div className="text-white text-center p-10">Checking authentication...</div>;
+    return (
+      <div className="text-white text-center p-10">
+        Checking authentication...
+      </div>
+    );
   }
+
+  const HomeElement = isVerified ? (
+    <Index />
+  ) : (
+    <HeroSection
+      onVerificationComplete={() => setIsVerified(true)}
+      isVerified={false}
+    />
+  );
 
   return (
     <QueryClientProvider client={queryClient}>
@@ -42,23 +55,12 @@ const App = () => {
         <Sonner />
         <BrowserRouter>
           <Routes>
-            <Route
-              path="/"
-              element={
-                isVerified ? (
-                  <Index />
-                ) : (
-                  <HeroSection
-                    onVerificationComplete={() => setIsVerified(true)}
-                    isVerified={false}
-                  />
-                )
-              }
-            />
-          <Route path="/about" element={<About />} />
-          <Route path="/contact" element={<Contact />} />
-          <Route path="/adminanalytics" element={<AdminAnalytics />} />
-          <Route path="*" element={<NotFound />} />
+            <Route path="/" element={HomeElement} />
+            <Route path="/services/:serviceId" element={HomeElement} />
+            <Route path="/about" element={<About />} />
+            <Route path="/contact" element={<Contact />} />
+            <Route path="/adminanalytics" element={<AdminAnalytics />} />
+            <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
       </TooltipProvider>

@@ -1,19 +1,8 @@
-
-import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { 
-  Palette, 
-  Scissors, 
-  Sparkles, 
-  Wrench, 
-  Car, 
-  Shield, 
-  Zap, 
-  Settings,
-  Layers,
-  Paintbrush,
-  Gauge 
+import {
+  Sparkles, Wrench, Car, Shield, Zap, Layers, Paintbrush, Gauge
 } from "lucide-react";
+import { Link } from "react-router-dom";
 
 const services = [
   { id: "Mechanical", name: "Mechanical", icon: Wrench },
@@ -31,21 +20,21 @@ interface ServiceTabsProps {
   onServiceSelect: (serviceId: string) => void;
 }
 
+const slugify = (s: string) => s.toLowerCase().replace(/\s+/g, "-");
+
 const ServiceTabs = ({ selectedService, onServiceSelect }: ServiceTabsProps) => {
   const handleServiceSelect = (serviceId: string) => {
     onServiceSelect(serviceId);
-    // Smooth scroll to garage cards section
+
+    // Smooth scroll to garage cards section (your original behavior)
     setTimeout(() => {
-    if (window.matchMedia("(max-width: 768px)").matches) {  // mobile breakpoint
-      const garageSection = document.getElementById('garage-cards-section');
-      if (garageSection) {
-        garageSection.scrollIntoView({ 
-          behavior: 'smooth',
-          block: 'start'
-        });
+      if (window.matchMedia("(max-width: 768px)").matches) {
+        const garageSection = document.getElementById("garage-cards-section");
+        if (garageSection) {
+          garageSection.scrollIntoView({ behavior: "smooth", block: "start" });
+        }
       }
-    }
-  }, 100);
+    }, 100);
   };
 
   return (
@@ -58,22 +47,25 @@ const ServiceTabs = ({ selectedService, onServiceSelect }: ServiceTabsProps) => 
           {services.map((service) => {
             const Icon = service.icon;
             const isSelected = selectedService === service.id;
-            
+            const to = `/services/${slugify(service.id)}`;
+
             return (
               <Button
                 key={service.id}
+                asChild
                 variant={isSelected ? "default" : "outline"}
-                onClick={() => handleServiceSelect(service.id)}
                 className={`h-auto py-4 px-3 flex flex-col items-center space-y-2 transition-all duration-200 ${
-                  isSelected 
-                    ? "bg-blue-600 hover:bg-blue-700 text-white shadow-lg scale-105" 
+                  isSelected
+                    ? "bg-blue-600 hover:bg-blue-700 text-white shadow-lg scale-105"
                     : "border-2 border-blue-200 hover:border-blue-400 hover:bg-blue-50 text-blue-700"
                 }`}
               >
-                <Icon className="h-6 w-6" />
-                <span className="text-xs font-medium text-center leading-tight">
-                  {service.name}
-                </span>
+                <Link to={to} onClick={() => handleServiceSelect(service.id)} aria-label={service.name}>
+                  <Icon className="h-6 w-6" />
+                  <span className="text-xs font-medium text-center leading-tight">
+                    {service.name}
+                  </span>
+                </Link>
               </Button>
             );
           })}

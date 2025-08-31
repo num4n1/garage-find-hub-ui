@@ -1,4 +1,4 @@
-import * as functions from "firebase-functions";
+import * as functions from "firebase-functions/v1";
 import admin from "firebase-admin";
 import express from "express";
 import cors from "cors";
@@ -11,9 +11,6 @@ if (!admin.apps.length) {
   admin.initializeApp();
 }
 const db = admin.firestore();
-
-// keep your exports (note the .js extension with ESM)
-export { notifyWaitlist, notifyLaunch } from "./waitlist.js";
 
 // ---- Config (firebase functions:config:set ...) ----
 const SENDGRID_KEY = process.env.SENDGRID_KEY || functions.config().sg?.key;

@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Mail, Shield } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { db } from "@/lib/firebase";
-import { addDoc, collection, serverTimestamp, doc, getDoc } from "firebase/firestore";
+import { setDoc, doc, serverTimestamp, getDoc } from "firebase/firestore";
 
 const LAUNCH_TS = Date.UTC(2025, 9, 1, 0, 0, 0); // Oct 1, 2025 (UTC)
 const BYPASS_KEY = "yf_admin_bypass";
@@ -41,35 +41,44 @@ export default function ComingSoon() {
 
   const subscribe = async () => {
     if (!/^\S+@\S+\.\S+$/.test(email)) {
-      toast({ title: "Invalid email", description: "Please enter a valid email.", variant: "destructive" });
+      toast({
+        title: "Invalid email",
+        description: "Please enter a valid email.",
+        variant: "destructive",
+      });
       return;
     }
+
     setSaving(true);
     try {
-      // Save to Firestore waitlist
-      await addDoc(collection(db, "waitlist"), {
-        email: email.toLowerCase(),
-        createdAt: serverTimestamp(),
-        notified: false,
-      });
+      const norm = email.trim().toLowerCase();
 
-      // Optional: ping Cloud Function to email support@yallafinder.com
-      if (API_BASE) {
-        try {
-          await fetch(`${API_BASE}/notify/waitlist`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ email }),
-          });
-        } catch {
-          // non-fatal
-        }
-      }
+      // Upsert into Firestore (doc id = email) — matches your screenshot's "Waitlist" (capital W)
+      await setDoc(
+        doc(db, "Waitlist", norm),
+        {
+          email: norm,
+          createdAt: serverTimestamp(),
+          notified: false,
+        },
+        { merge: true }
+      );
 
       setEmail("");
-      toast({ title: "Subscribed!", description: "We’ll email you the moment we launch." });
+      toast({
+        title: "Subscribed!",
+        description: "You’ll be notified the moment we launch.",
+      });
     } catch (e: any) {
-      toast({ title: "Failed to subscribe", description: e?.message ?? "Please try again.", variant: "destructive" });
+      // Most common cause is Firestore security rules blocking unauth writes
+      const msg = e?.message?.includes("Missing or insufficient permissions")
+        ? "Permissions error: update your Firestore rules to allow creating docs in the Waitlist collection."
+        : e?.message ?? "Please try again.";
+      toast({
+        title: "Failed to subscribe",
+        description: msg,
+        variant: "destructive",
+      });
     } finally {
       setSaving(false);
     }
@@ -79,7 +88,9 @@ export default function ComingSoon() {
     setAdminErr("");
     try {
       const snap = await getDoc(doc(db, "Password", "Admin"));
-      const expected = snap.exists() ? (snap.data() as any)?.password : undefined;
+      const expected = snap.exists()
+        ? (snap.data() as any)?.password
+        : undefined;
       if (!expected) throw new Error("Password not configured");
 
       if (adminPwd === expected) {
@@ -92,7 +103,6 @@ export default function ComingSoon() {
       setAdminErr(e?.message || "Failed to verify");
     }
   };
-
 
   return (
     <div className="relative min-h-screen text-white overflow-hidden">
@@ -125,15 +135,24 @@ export default function ComingSoon() {
                 onKeyDown={(e) => e.key === "Enter" && tryAdmin()}
                 autoFocus
               />
-              <Button className="bg-blue-600 hover:bg-blue-700 h-9" onClick={tryAdmin}>
+              <Button
+                className="bg-blue-600 hover:bg-blue-700 h-9"
+                onClick={tryAdmin}
+              >
                 Go
               </Button>
-              <Button variant="ghost" className="h-9 text-blue-100" onClick={() => setAdminOpen(false)}>
+              <Button
+                variant="ghost"
+                className="h-9 text-blue-100"
+                onClick={() => setAdminOpen(false)}
+              >
                 Cancel
               </Button>
             </div>
           )}
-          {adminErr && <div className="mt-2 text-xs text-red-300">{adminErr}</div>}
+          {adminErr && (
+            <div className="mt-2 text-xs text-red-300">{adminErr}</div>
+          )}
         </div>
       </div>
 
@@ -152,7 +171,9 @@ export default function ComingSoon() {
             />
           </div>
 
-          <div className="text-sm md:text-base text-blue-200/90 mb-3">Something great is on the way</div>
+          <div className="text-sm md:text-base text-blue-200/90 mb-3">
+            Something great is on the way
+          </div>
           <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold tracking-[0.08em] mb-4">
             COMING&nbsp;SOON
           </h1>
@@ -169,8 +190,12 @@ export default function ComingSoon() {
                   key={label as string}
                   className="w-20 md:w-24 px-3 py-3 rounded-2xl bg-white/5 backdrop-blur border border-white/10"
                 >
-                  <div className="text-2xl md:text-3xl tabular-nums">{String(val as number).padStart(2, "0")}</div>
-                  <div className="text-[10px] md:text-xs text-blue-200/80 mt-1">{label}</div>
+                  <div className="text-2xl md:text-3xl tabular-nums">
+                    {String(val as number).padStart(2, "0")}
+                  </div>
+                  <div className="text-[10px] md:text-xs text-blue-200/80 mt-1">
+                    {label}
+                  </div>
                 </div>
               ))}
             </div>
@@ -180,7 +205,9 @@ export default function ComingSoon() {
           <div className="mx-auto max-w-xl bg-white/5 backdrop-blur rounded-2xl p-4 md:p-6 border border-white/10">
             <div className="flex items-center gap-2 mb-3 justify-center">
               <Mail className="h-5 w-5 text-blue-200" />
-              <p className="text-blue-100 text-sm md:text-base">Get notified the moment we launch.</p>
+              <p className="text-blue-100 text-sm md:text-base">
+                Get notified the moment we launch.
+              </p>
             </div>
             <div className="flex flex-col sm:flex-row gap-3">
               <Input
@@ -190,15 +217,22 @@ export default function ComingSoon() {
                 onChange={(e) => setEmail(e.target.value)}
                 className="bg-white/90 text-gray-900 placeholder:text-gray-500"
               />
-              <Button onClick={subscribe} disabled={saving} className="bg-blue-600 hover:bg-blue-700">
+              <Button
+                onClick={subscribe}
+                disabled={saving}
+                className="bg-blue-600 hover:bg-blue-700"
+              >
                 {saving ? "Joining..." : "Notify me"}
               </Button>
             </div>
-            <p className="text-xs text-blue-200/80 mt-3">No spam. Unsubscribe any time.</p>
+            <p className="text-xs text-blue-200/80 mt-3">
+              No spam. Unsubscribe any time.
+            </p>
           </div>
 
           <div className="mt-12 text-blue-200/80 text-xs">
-            Launching on <span className="font-semibold">October 1st, 2025</span>
+            Launching on{" "}
+            <span className="font-semibold">October 1st, 2025</span>
           </div>
         </div>
       </main>

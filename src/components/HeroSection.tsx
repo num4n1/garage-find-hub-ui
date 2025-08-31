@@ -6,6 +6,7 @@ import { useToast } from "@/hooks/use-toast";
 import { auth } from "@/lib/firebase";
 import { signInWithCustomToken } from "firebase/auth";
 import logoUrl from "@/assets/yallafinder_logo_transparent.svg";
+import Header from "@/components/Header";
 
 interface HeroSectionProps {
   onVerificationComplete: () => void;
@@ -110,6 +111,8 @@ const HeroSection = ({ onVerificationComplete, isVerified }: HeroSectionProps) =
   }
 
   return (
+    <>
+    <Header />
     <div className="bg-gradient-to-r from-blue-600 to-blue-700 text-white min-h-screen flex items-center justify-center">
       <div className="max-w-2xl mx-auto px-4 text-center mt-[-40px] sm:mt-0">
         {/* <ScanSearch className="h-20 w-20 mx-auto mb-6" /> */}
@@ -167,6 +170,7 @@ const HeroSection = ({ onVerificationComplete, isVerified }: HeroSectionProps) =
         </p>
       </div>
     </div>
+    </>
   );
 };
 

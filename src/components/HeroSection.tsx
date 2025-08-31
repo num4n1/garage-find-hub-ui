@@ -17,10 +17,17 @@ const API_BASE = import.meta.env.VITE_API_BASE; // e.g. https://us-central1-gara
 
 const safeJson = async (res: Response) => {
   const text = await res.text();
-  try { return JSON.parse(text); } catch { return { __raw: text }; }
+  try {
+    return JSON.parse(text);
+  } catch {
+    return { __raw: text };
+  }
 };
 
-const HeroSection = ({ onVerificationComplete, isVerified }: HeroSectionProps) => {
+const HeroSection = ({
+  onVerificationComplete,
+  isVerified,
+}: HeroSectionProps) => {
   const [email, setEmail] = useState("");
   const [code, setCode] = useState("");
   const [sent, setSent] = useState(false);
@@ -30,7 +37,11 @@ const HeroSection = ({ onVerificationComplete, isVerified }: HeroSectionProps) =
 
   const handleSend = async () => {
     if (!/^\S+@\S+\.\S+$/.test(email)) {
-      toast({ title: "Invalid email", description: "Please enter a valid email.", variant: "destructive" });
+      toast({
+        title: "Invalid email",
+        description: "Please enter a valid email.",
+        variant: "destructive",
+      });
       return;
     }
     setIsSending(true);
@@ -38,7 +49,7 @@ const HeroSection = ({ onVerificationComplete, isVerified }: HeroSectionProps) =
       const res = await fetch(`${API_BASE}/email/send`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email })
+        body: JSON.stringify({ email }),
       });
       const data = await safeJson(res);
       if (!res.ok || data?.ok === false) {
@@ -46,9 +57,16 @@ const HeroSection = ({ onVerificationComplete, isVerified }: HeroSectionProps) =
         throw new Error(msg);
       }
       setSent(true);
-      toast({ title: "Code sent!", description: `We emailed a 6-digit code to ${email}` });
+      toast({
+        title: "Code sent!",
+        description: `We emailed a 6-digit code to ${email}`,
+      });
     } catch (e: any) {
-      toast({ title: "Send failed", description: e?.message || "Please try again.", variant: "destructive" });
+      toast({
+        title: "Send failed",
+        description: e?.message || "Please try again.",
+        variant: "destructive",
+      });
     } finally {
       setIsSending(false);
     }
@@ -56,7 +74,11 @@ const HeroSection = ({ onVerificationComplete, isVerified }: HeroSectionProps) =
 
   const handleVerify = async () => {
     if (!/^\d{6}$/.test(code)) {
-      toast({ title: "Invalid code", description: "Enter the 6-digit code.", variant: "destructive" });
+      toast({
+        title: "Invalid code",
+        description: "Enter the 6-digit code.",
+        variant: "destructive",
+      });
       return;
     }
     setIsVerifying(true);
@@ -64,7 +86,7 @@ const HeroSection = ({ onVerificationComplete, isVerified }: HeroSectionProps) =
       const res = await fetch(`${API_BASE}/email/verify`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, code })
+        body: JSON.stringify({ email, code }),
       });
       const data = await safeJson(res);
       if (!res.ok || data?.ok === false) {
@@ -75,7 +97,11 @@ const HeroSection = ({ onVerificationComplete, isVerified }: HeroSectionProps) =
       toast({ title: "Verified", description: "You can now browse garages." });
       onVerificationComplete();
     } catch (e: any) {
-      toast({ title: "Verification failed", description: e?.message || "Server error", variant: "destructive" });
+      toast({
+        title: "Verification failed",
+        description: e?.message || "Server error",
+        variant: "destructive",
+      });
     } finally {
       setIsVerifying(false);
     }
@@ -83,7 +109,7 @@ const HeroSection = ({ onVerificationComplete, isVerified }: HeroSectionProps) =
 
   useEffect(() => {
     const onEnter = (e: KeyboardEvent) => {
-      if (e.key === "Enter") (!sent ? handleSend() : handleVerify());
+      if (e.key === "Enter") !sent ? handleSend() : handleVerify();
     };
     window.addEventListener("keydown", onEnter);
     return () => window.removeEventListener("keydown", onEnter);
@@ -103,8 +129,12 @@ const HeroSection = ({ onVerificationComplete, isVerified }: HeroSectionProps) =
               decoding="async"
             />
           </div>
-          <h1 className="text-3xl md:text-4xl font-bold mb-4">Find the Perfect Garage for Your Car</h1>
-          <p className="text-xl text-blue-100">Discover trusted garages for all your automotive needs in Dubai</p>
+          <h1 className="text-3xl md:text-4xl font-bold mb-4">
+            Find the Perfect Garage for Your Car
+          </h1>
+          <p className="text-xl text-blue-100">
+            Discover trusted garages for all your automotive needs in Dubai
+          </p>
         </div>
       </div>
     );
@@ -112,64 +142,80 @@ const HeroSection = ({ onVerificationComplete, isVerified }: HeroSectionProps) =
 
   return (
     <>
-    <Header />
-    <div className="bg-gradient-to-r from-blue-600 to-blue-700 text-white min-h-screen flex items-center justify-center">
-      <div className="max-w-2xl mx-auto px-4 text-center mt-[-40px] sm:mt-0">
-        {/* <ScanSearch className="h-20 w-20 mx-auto mb-6" /> */}
-        <div className="mx-auto mb-6 h-20 w-20">
-          <img
-            src="/assets/yallafinder_logo_square.svg"
-            alt="YallaFinder"
-            className="h-full w-full object-contain block"
-            loading="eager"
-            decoding="async"
-          />
-        </div>
-        <h1 className="text-4xl md:text-5xl font-bold mb-6">Welcome to YallaFinder</h1>
-        <p className="text-xl text-blue-100 mb-8">Verify your email to access trusted garages</p>
+      <Header />
+      <div className="bg-gradient-to-r from-blue-600 to-blue-700 text-white h-[calc(100dvh-4rem-1px)] flex items-center justify-center overflow-hidden">
+        <div className="max-w-2xl mx-auto px-4 text-center">
+          {/* <ScanSearch className="h-20 w-20 mx-auto mb-6" /> */}
+          <div className="mx-auto mb-6 h-20 w-20">
+            <img
+              src="/assets/yallafinder_logo_square.svg"
+              alt="YallaFinder"
+              className="h-full w-full object-contain block"
+              loading="eager"
+              decoding="async"
+            />
+          </div>
+          <h1 className="text-4xl md:text-5xl font-bold mb-6">
+            Welcome to YallaFinder
+          </h1>
+          <p className="text-xl text-blue-100 mb-8">
+            Verify your email to access trusted garages
+          </p>
 
-        <div className="bg-white rounded-lg shadow-xl p-8 text-gray-900 max-w-md mx-auto">
-          {!sent ? (
-            <>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
-              <div className="relative mb-6">
-                <Mail className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
+          <div className="bg-white rounded-lg shadow-xl p-8 text-gray-900 max-w-md mx-auto">
+            {!sent ? (
+              <>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Email
+                </label>
+                <div className="relative mb-6">
+                  <Mail className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
+                  <Input
+                    type="email"
+                    placeholder="you@example.com"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="pl-10 text-lg"
+                  />
+                </div>
+                <Button
+                  onClick={handleSend}
+                  disabled={isSending}
+                  className="w-full bg-blue-600 hover:bg-blue-700 text-lg py-3"
+                >
+                  {isSending ? "Sending..." : "Send Verification Code"}
+                </Button>
+              </>
+            ) : (
+              <>
+                <label className="block text-sm font-medium text-gray-700 mb-2 text-center">
+                  Verification Code
+                </label>
                 <Input
-                  type="email"
-                  placeholder="you@example.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="pl-10 text-lg"
+                  type="text"
+                  inputMode="numeric"
+                  placeholder="Enter 6-digit code"
+                  value={code}
+                  onChange={(e) => setCode(e.target.value.replace(/\D/g, ""))}
+                  className="text-center text-lg tracking-widest mb-4"
+                  maxLength={6}
                 />
-              </div>
-              <Button onClick={handleSend} disabled={isSending} className="w-full bg-blue-600 hover:bg-blue-700 text-lg py-3">
-                {isSending ? "Sending..." : "Send Verification Code"}
-              </Button>
-            </>
-          ) : (
-            <>
-              <label className="block text-sm font-medium text-gray-700 mb-2 text-center">Verification Code</label>
-              <Input
-                type="text"
-                inputMode="numeric"
-                placeholder="Enter 6-digit code"
-                value={code}
-                onChange={(e) => setCode(e.target.value.replace(/\D/g, ""))}
-                className="text-center text-lg tracking-widest mb-4"
-                maxLength={6}
-              />
-              <Button onClick={handleVerify} disabled={isVerifying} className="w-full bg-blue-600 hover:bg-blue-700 text-lg py-3">
-                {isVerifying ? "Verifying..." : "Verify & Continue"}
-              </Button>
-            </>
-          )}
-        </div>
+                <Button
+                  onClick={handleVerify}
+                  disabled={isVerifying}
+                  className="w-full bg-blue-600 hover:bg-blue-700 text-lg py-3"
+                >
+                  {isVerifying ? "Verifying..." : "Verify & Continue"}
+                </Button>
+              </>
+            )}
+          </div>
 
-        <p className="text-blue-200 text-sm mt-6">
-          Your privacy is protected. We only use your email for verification.
-        </p>
+          <p className="text-blue-200 text-sm mt-6">
+            Your privacy is protected. We only use your email for verification.
+          </p>
+        </div>
       </div>
-    </div>
     </>
   );
 };

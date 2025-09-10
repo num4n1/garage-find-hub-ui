@@ -7,7 +7,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 
 import Index from "./pages/Index";
 import About from "./pages/About";
@@ -15,6 +15,43 @@ import Contact from "./pages/Contact";
 import AdminAnalytics from "./pages/AdminAnalytics";
 import NotFound from "./pages/NotFound";
 import HeroSection from "@/components/HeroSection";
+
+function TitleSetter() {
+  const { pathname } = useLocation();
+
+  // extract slug if path is /services/:slug
+  const match = pathname.match(/^\/services\/([^/]+)/);
+  const slug = match?.[1]?.toLowerCase();
+
+  const SLUG_TO_NAME: Record<string, string> = {
+    mechanical: "Mechanical",
+    wrapping: "Wrapping",
+    electrical: "Electrical",
+    ppf: "PPF",
+    painting: "Auto Painting",
+    ceramic: "Ceramic",
+    upholstery: "Upholstery",
+    tinting: "Window Tinting",
+  };
+
+  const baseByPath: Record<string, string> = {
+    "/": "YallaFinder",
+    "/services": "YallaFinder | Services", // optional
+    "/about": "YallaFinder | About",
+    "/contact": "YallaFinder | Contact",
+    "/adminanalytics": "YallaFinder | Admin Analytics",
+  };
+
+  useEffect(() => {
+    if (slug && SLUG_TO_NAME[slug]) {
+      document.title = `YallaFinder | ${SLUG_TO_NAME[slug]}`;
+      return;
+    }
+    document.title = baseByPath[pathname] ?? "YallaFinder";
+  }, [pathname, slug]);
+
+  return null;
+}
 
 const queryClient = new QueryClient();
 
@@ -54,6 +91,7 @@ const App = () => {
         <Toaster />
         <Sonner />
         <BrowserRouter>
+          <TitleSetter />
           <Routes>
             <Route path="/" element={HomeElement} />
             <Route path="/services/:serviceId" element={HomeElement} />

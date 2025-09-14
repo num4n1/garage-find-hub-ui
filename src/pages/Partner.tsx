@@ -29,7 +29,7 @@ export default function Partner() {
 
   const [garageName, setGarageName] = useState("");
   const [services, setServices] = useState<ServiceId[]>([]);
-  const [about, setAbout] = useState("");
+  const [about, setAbout] = useState("");         // <-- now OPTIONAL
   const [location, setLocation] = useState("");
   const [whatsapp, setWhatsapp] = useState("");
   const [website, setWebsite] = useState("");
@@ -49,11 +49,14 @@ export default function Partner() {
   const toggleService = (id: ServiceId) =>
     setServices(s => s.includes(id) ? s.filter(x => x !== id) : [...s, id]);
 
-  const valid = () =>
-    garageName.trim().length >= 2 &&
-    services.length > 0 &&
-    about.trim().length >= 10 &&
-    /^\+?[0-9\s-()]{7,}$/.test(whatsapp || "");
+  // --- helper: first missing/invalid field only ---
+  const firstMissing = () => {
+    if (!garageName.trim()) return { field: "Garage name", key: "name" as const };
+    if (services.length === 0) return { field: "Services", key: "services" as const };
+    if (!/^\+?[0-9\s-()]{7,}$/.test((whatsapp || "").trim()))
+      return { field: "WhatsApp number", key: "whatsapp" as const };
+    return null;
+  };
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -61,10 +64,18 @@ export default function Partner() {
       toast({ title: "Not configured", description: "VITE_API_BASE is missing", variant: "destructive" });
       return;
     }
-    if (!valid()) {
-      toast({ title: "Missing details", description: "Fill name, services, about, and a valid WhatsApp.", variant: "destructive" });
+
+    // validate only one at a time, in order
+    const miss = firstMissing();
+    if (miss) {
+      const msg =
+        miss.key === "whatsapp"
+          ? "Please enter a valid WhatsApp number."
+          : `Please provide ${miss.field.toLowerCase()}.`;
+      toast({ title: `Missing: ${miss.field}`, description: msg, variant: "destructive" });
       return;
     }
+
     setSending(true);
     try {
       const res = await fetch(`${API_BASE}/partner/lead`, {
@@ -73,7 +84,7 @@ export default function Partner() {
         body: JSON.stringify({
           garageName,
           services,
-          about,
+          about,      // optional; still sent if provided
           location,
           whatsapp,
           website,
@@ -102,7 +113,7 @@ export default function Partner() {
           {/* Pitch / Info */}
           <div className="space-y-6 md:space-y-8">
             <div className="text-center lg:text-left">
-              <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold text-blue-900 mb-4">
+              <h1 className="text-2xl md:3xl lg:text-4xl font-bold text-blue-900 mb-4">
                 List your garage on YallaFinder
               </h1>
               <p className="text-base md:text-lg text-gray-700">
@@ -149,15 +160,24 @@ export default function Partner() {
 
             <form className="space-y-5 md:space-y-6" onSubmit={submit}>
               <div>
-                <Label htmlFor="gname">Garage name</Label>
-                <Input id="gname" placeholder="e.g., Numan's Auto Repair"
+                <Label htmlFor="gname">
+                  Garage name <span className="text-red-600">*</span>
+                </Label>
+                <Input
+                  id="gname"
+                  placeholder="e.g., Numan's Auto Repair"
                   className="mt-1 h-10 md:h-11"
-                  value={garageName} onChange={e => setGarageName(e.target.value)} />
+                  value={garageName}
+                  onChange={e => setGarageName(e.target.value)}
+                  aria-required
+                />
               </div>
 
               {/* Services multi-select */}
               <div>
-                <Label>Services (pick all that apply)</Label>
+                <Label>
+                  Services (pick all that apply) <span className="text-red-600">*</span>
+                </Label>
                 <div className="mt-2 grid grid-cols-2 sm:grid-cols-3 gap-2">
                   {SERVICES.map(s => {
                     const Icon = s.icon;
@@ -185,82 +205,56 @@ export default function Partner() {
                 )}
               </div>
 
+              {/* About is OPTIONAL */}
               <div>
-                <Label htmlFor="about">About your garage (mention specialties)</Label>
+                <Label htmlFor="about">About your garage (optional)</Label>
                 <textarea
                   id="about"
                   className="w-full mt-1 px-3 py-2 md:px-4 md:py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
                   rows={2}
                   placeholder="Tell drivers why they should pick you. E.g., German cars, hybrid diagnostics, same-day brakes, paint booth, etc."
-                  value={about} onChange={e => setAbout(e.target.value)}
+                  value={about}
+                  onChange={e => setAbout(e.target.value)}
                 />
               </div>
 
               {/* Contact & location */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <Label htmlFor="wa">WhatsApp number</Label>
-                  <Input id="wa" type="tel" placeholder="+971 50 123 4567"
+                  <Label htmlFor="wa">
+                    WhatsApp number <span className="text-red-600">*</span>
+                  </Label>
+                  <Input
+                    id="wa"
+                    type="tel"
+                    placeholder="+971 50 123 4567"
                     className="mt-1 h-10 md:h-11"
-                    value={whatsapp} onChange={e => setWhatsapp(e.target.value)} />
+                    value={whatsapp}
+                    onChange={e => setWhatsapp(e.target.value)}
+                    aria-required
+                  />
                 </div>
                 <div>
                   <Label htmlFor="ig">Instagram (optional)</Label>
-                  <Input id="ig" placeholder="@yourgarage"
+                  <Input
+                    id="ig"
+                    placeholder="@yourgarage"
                     className="mt-1 h-10 md:h-11"
-                    value={instagram} onChange={e => setInstagram(e.target.value)} />
+                    value={instagram}
+                    onChange={e => setInstagram(e.target.value)}
+                  />
                 </div>
               </div>
 
-              {/* Extra options
-              <div>
-                <Label>Options</Label>
-                <div className="mt-2 grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm">
-                  <label className="flex items-center gap-2">
-                    <input type="checkbox"
-                      checked={opts.pickupDrop}
-                      onChange={e => setOpts(o => ({ ...o, pickupDrop: e.target.checked }))} />
-                    Pickup & drop-off
-                  </label>
-                  <label className="flex items-center gap-2">
-                    <input type="checkbox"
-                      checked={opts.mobileService}
-                      onChange={e => setOpts(o => ({ ...o, mobileService: e.target.checked }))} />
-                    Mobile service
-                  </label>
-                  <label className="flex items-center gap-2">
-                    <input type="checkbox"
-                      checked={opts.emergency24h}
-                      onChange={e => setOpts(o => ({ ...o, emergency24h: e.target.checked }))} />
-                    24h emergency
-                  </label>
-                  <label className="flex items-center gap-2">
-                    <input type="checkbox"
-                      checked={opts.insuranceClaims}
-                      onChange={e => setOpts(o => ({ ...o, insuranceClaims: e.target.checked }))} />
-                    Accepts insurance claims
-                  </label>
-                  <label className="flex items-center gap-2">
-                    <input type="checkbox"
-                      checked={opts.freeEstimates}
-                      onChange={e => setOpts(o => ({ ...o, freeEstimates: e.target.checked }))} />
-                    Free estimates
-                  </label>
-                  <div className="flex items-center gap-2">
-                    <span>Warranty</span>
-                    <Input
-                      type="number"
-                      min={0}
-                      className="h-9 w-20"
-                      value={opts.warrantyMonths}
-                      onChange={e => setOpts(o => ({ ...o, warrantyMonths: Number(e.target.value || 0) }))}
-                    />
-                    <span>months</span>
-                  </div>
-                </div>
-              </div> */}
+              {/* Optional extras (kept commented)
+              ...
+              */}
 
-              <Button type="submit" disabled={sending} className="w-full bg-blue-600 hover:bg-blue-700 text-base md:text-lg py-3 md:py-3.5">
+              <Button
+                type="submit"
+                disabled={sending}
+                className="w-full bg-blue-600 hover:bg-blue-700 text-base md:text-lg py-3 md:py-3.5"
+              >
                 {sending ? "Submitting..." : "Submit application"}
               </Button>
             </form>

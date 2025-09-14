@@ -28,11 +28,19 @@ const Contact = () => {
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!API_BASE) {
-      toast({ title: "Not configured", description: "VITE_API_BASE is missing", variant: "destructive" });
+      toast({
+        title: "Not configured",
+        description: "VITE_API_BASE is missing",
+        variant: "destructive",
+      });
       return;
     }
     if (!validate()) {
-      toast({ title: "Check your info", description: "Please fill in required fields correctly.", variant: "destructive" });
+      toast({
+        title: "Check your info",
+        description: "Please fill in required fields correctly.",
+        variant: "destructive",
+      });
       return;
     }
     setSending(true);
@@ -43,11 +51,22 @@ const Contact = () => {
         body: JSON.stringify({ name, email, phone, message }),
       });
       const data = await res.json().catch(() => ({}));
-      if (!res.ok || data?.ok === false) throw new Error(data?.error || `HTTP ${res.status}`);
-      toast({ title: "Message sent ✅", description: "We’ll get back to you soon." });
-      setName(""); setEmail(""); setPhone(""); setMessage("");
+      if (!res.ok || data?.ok === false)
+        throw new Error(data?.error || `HTTP ${res.status}`);
+      toast({
+        title: "Message sent ✅",
+        description: "We’ll get back to you soon.",
+      });
+      setName("");
+      setEmail("");
+      setPhone("");
+      setMessage("");
     } catch (err: any) {
-      toast({ title: "Send failed", description: err?.message || "Please try again later.", variant: "destructive" });
+      toast({
+        title: "Send failed",
+        description: err?.message || "Please try again later.",
+        variant: "destructive",
+      });
     } finally {
       setSending(false);
     }
@@ -61,9 +80,12 @@ const Contact = () => {
           {/* Contact Info Section */}
           <div className="space-y-6 md:space-y-8">
             <div className="text-center lg:text-left">
-              <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold text-blue-900 mb-4">Get in Touch</h1>
+              <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold text-blue-900 mb-4">
+                Get in Touch
+              </h1>
               <p className="text-base md:text-lg text-gray-700">
-                Have questions about YallaFinder? We're here to help you connect with the best local garages.
+                Have questions about YallaFinder? We're here to help you connect
+                with the best local garages.
               </p>
             </div>
 
@@ -73,8 +95,12 @@ const Contact = () => {
                   <Phone className="h-5 w-5 md:h-6 md:w-6 text-white" />
                 </div>
                 <div>
-                  <h3 className="font-semibold text-blue-900 text-sm md:text-base">24/7 Support</h3>
-                  <p className="text-gray-600 text-sm md:text-base">Coming soon!</p>
+                  <h3 className="font-semibold text-blue-900 text-sm md:text-base">
+                    24/7 Support
+                  </h3>
+                  <p className="text-gray-600 text-sm md:text-base">
+                    Coming soon!
+                  </p>
                 </div>
               </div>
 
@@ -83,8 +109,12 @@ const Contact = () => {
                   <Mail className="h-5 w-5 md:h-6 md:w-6 text-white" />
                 </div>
                 <div>
-                  <h3 className="font-semibold text-blue-900 text-sm md:text-base">Email Us</h3>
-                  <p className="text-gray-600 text-sm md:text-base break-all">support@yallafinder.com</p>
+                  <h3 className="font-semibold text-blue-900 text-sm md:text-base">
+                    Email Us
+                  </h3>
+                  <p className="text-gray-600 text-sm md:text-base break-all">
+                    support@yallafinder.com
+                  </p>
                 </div>
               </div>
 
@@ -93,8 +123,12 @@ const Contact = () => {
                   <MessageCircle className="h-5 w-5 md:h-6 md:w-6 text-white" />
                 </div>
                 <div>
-                  <h3 className="font-semibold text-blue-900 text-sm md:text-base">WhatsApp</h3>
-                  <p className="text-gray-600 text-sm md:text-base">Quick response guaranteed</p>
+                  <h3 className="font-semibold text-blue-900 text-sm md:text-base">
+                    WhatsApp
+                  </h3>
+                  <p className="text-gray-600 text-sm md:text-base">
+                    Quick response guaranteed
+                  </p>
                 </div>
               </div>
 
@@ -103,8 +137,12 @@ const Contact = () => {
                   <MapPin className="h-5 w-5 md:h-6 md:w-6 text-white" />
                 </div>
                 <div>
-                  <h3 className="font-semibold text-blue-900 text-sm md:text-base">Locations</h3>
-                  <p className="text-gray-600 text-sm md:text-base">Serving garages nationwide</p>
+                  <h3 className="font-semibold text-blue-900 text-sm md:text-base">
+                    Locations
+                  </h3>
+                  <p className="text-gray-600 text-sm md:text-base">
+                    Serving garages nationwide
+                  </p>
                 </div>
               </div>
             </div>
@@ -112,7 +150,9 @@ const Contact = () => {
 
           {/* Contact Form Section */}
           <div className="bg-white rounded-xl md:rounded-2xl shadow-xl p-6 md:p-8">
-            <h2 className="text-xl md:text-2xl font-bold text-blue-900 mb-6 text-center lg:text-left">Send us a Message</h2>
+            <h2 className="text-xl md:text-2xl font-bold text-blue-900 mb-6 text-center lg:text-left">
+              Send us a Message
+            </h2>
 
             <form className="space-y-4 md:space-y-6" onSubmit={onSubmit}>
               {/* Honeypot (hidden) */}
@@ -126,26 +166,56 @@ const Contact = () => {
                 autoComplete="off"
               />
 
+              {/* Name (required) */}
               <div>
-                <Label htmlFor="name" className="text-sm md:text-base">Name</Label>
-                <Input id="name" placeholder="Full name" className="mt-1 h-10 md:h-11 text-sm md:text-base"
-                  value={name} onChange={(e) => setName(e.target.value)} />
+                <Label htmlFor="name" className="text-sm md:text-base">
+                  Name <span className="text-red-600">*</span>
+                </Label>
+                <Input
+                  id="name"
+                  placeholder="Full name"
+                  className="mt-1 h-10 md:h-11 text-sm md:text-base"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  aria-required
+                />
+              </div>
+
+              {/* Email (required) */}
+              <div>
+                <Label htmlFor="email" className="text-sm md:text-base">
+                  Email <span className="text-red-600">*</span>
+                </Label>
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="you@example.com"
+                  className="mt-1 h-10 md:h-11 text-sm md:text-base"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  aria-required
+                />
               </div>
 
               <div>
-                <Label htmlFor="email" className="text-sm md:text-base">Email</Label>
-                <Input id="email" type="email" placeholder="you@example.com" className="mt-1 h-10 md:h-11 text-sm md:text-base"
-                  value={email} onChange={(e) => setEmail(e.target.value)} />
+                <Label htmlFor="phone" className="text-sm md:text-base">
+                  Phone Number (optional)
+                </Label>
+                <Input
+                  id="phone"
+                  type="tel"
+                  placeholder="+1 555 555 5555"
+                  className="mt-1 h-10 md:h-11 text-sm md:text-base"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                />
               </div>
 
+              {/* Message (required) */}
               <div>
-                <Label htmlFor="phone" className="text-sm md:text-base">Phone Number (optional)</Label>
-                <Input id="phone" type="tel" placeholder="+1 555 555 5555" className="mt-1 h-10 md:h-11 text-sm md:text-base"
-                  value={phone} onChange={(e) => setPhone(e.target.value)} />
-              </div>
-
-              <div>
-                <Label htmlFor="message" className="text-sm md:text-base">Message</Label>
+                <Label htmlFor="message" className="text-sm md:text-base">
+                  Message <span className="text-red-600">*</span>
+                </Label>
                 <textarea
                   id="message"
                   placeholder="How can we help you?"
@@ -153,10 +223,15 @@ const Contact = () => {
                   rows={4}
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
+                  aria-required
                 />
               </div>
 
-              <Button type="submit" disabled={sending} className="w-full bg-blue-600 hover:bg-blue-700 text-base md:text-lg py-3 md:py-3.5 transition-colors">
+              <Button
+                type="submit"
+                disabled={sending}
+                className="w-full bg-blue-600 hover:bg-blue-700 text-base md:text-lg py-3 md:py-3.5 transition-colors"
+              >
                 {sending ? "Sending..." : "Send Message"}
               </Button>
             </form>

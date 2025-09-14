@@ -320,5 +320,99 @@ app.post("/contact/send", async (req, res) => {
   }
 });
 
+// --- Partner lead (garage registration) -------------------------------
+// Rate limit: 5 submissions / 5 minutes (per WhatsApp or garage name)
+const limiterPartner = new RateLimiterMemory({ points: 5, duration: 300 });
+
+app.post("/partner/lead", async (req, res) => {
+  try {
+    const {
+      garageName = "",
+      services = [],
+      about = "",
+      location = "",
+      whatsapp = "",
+      website = "",
+      instagram = "",
+      options = {},
+    } = req.body || {};
+
+    // Basic validation
+    if (String(garageName).trim().length < 2) {
+      return res.status(400).json({ ok: false, error: "garageName required" });
+    }
+    if (!Array.isArray(services) || services.length === 0) {
+      return res.status(400).json({ ok: false, error: "At least one service required" });
+    }
+
+    // Rate limit key
+    const rlKey = (whatsapp || garageName).toLowerCase();
+    await limiterPartner.consume(rlKey);
+
+    const safe = (s) => String(s ?? "").slice(0, 4000);
+    const safeArr = (arr) => (Array.isArray(arr) ? arr.map((x) => safe(x)) : []);
+    const serviceList = safeArr(services).join(", ");
+
+    const subject = `Garage registration - ${safe(garageName)} - ${serviceList}`;
+
+    const html = `
+      <div style="font-family:Inter,Segoe UI,system-ui,sans-serif;font-size:14px;color:#111">
+        <h2 style="margin:0 0 8px">${APP_NAME} — New Garage Registration</h2>
+        <table style="border-collapse:collapse;width:100%;max-width:700px">
+          <tr><td style="padding:6px 0;width:160px"><strong>Garage</strong></td><td>${safe(garageName)}</td></tr>
+          <tr><td style="padding:6px 0"><strong>Services</strong></td><td>${serviceList}</td></tr>
+          <tr><td style="padding:6px 0"><strong>About</strong></td><td>${safe(about).replace(/\n/g, "<br/>")}</td></tr>
+          <tr><td style="padding:6px 0"><strong>Location</strong></td><td>${safe(location)}</td></tr>
+          <tr><td style="padding:6px 0"><strong>WhatsApp</strong></td><td>${safe(whatsapp)}</td></tr>
+          <tr><td style="padding:6px 0"><strong>Website</strong></td><td>${safe(website)}</td></tr>
+          <tr><td style="padding:6px 0"><strong>Instagram</strong></td><td>${safe(instagram)}</td></tr>
+          <tr><td style="padding:6px 0;vertical-align:top"><strong>Options</strong></td>
+              <td><pre style="margin:0;background:#f3f4f6;padding:8px;border-radius:6px;white-space:pre-wrap">${safe(JSON.stringify(options, null, 2))}</pre></td></tr>
+        </table>
+      </div>
+    `;
+
+    const text = `
+${APP_NAME} — New Garage Registration
+
+Garage: ${safe(garageName)}
+Services: ${serviceList}
+About:
+${safe(about)}
+
+Location: ${safe(location)}
+WhatsApp: ${safe(whatsapp)}
+Website: ${safe(website)}
+Instagram: ${safe(instagram)}
+
+Options:
+${safe(JSON.stringify(options, null, 2))}
+    `.trim();
+
+    if (!SENDGRID_KEY) {
+      console.warn("No SENDGRID_KEY set; skipping email send for partner lead");
+      return res.status(200).json({ ok: true, note: "email skipped (no key)" });
+    }
+
+    await sgMail.send({
+      to: REPLYTO, // support@yallafinder.com
+      from: { email: SENDER, name: APP_NAME }, // no-reply@yallafinder.com
+      replyTo: REPLYTO,
+      subject,
+      text,
+      html,
+    });
+
+    return res.json({ ok: true });
+  } catch (e) {
+    if (e && typeof e === "object" && "remainingPoints" in e) {
+      return res.status(429).json({ ok: false, error: "Too many requests" });
+    }
+    console.error("partner/lead error:", e);
+    return res.status(500).json({ ok: false, error: "Server error" });
+  }
+});
+
+
 // Export the Express API
 export const api = functions.https.onRequest(app);

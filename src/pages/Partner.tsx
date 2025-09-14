@@ -1,5 +1,19 @@
 import { useState } from "react";
-import { Wrench, Layers, Zap, Car, Paintbrush, Sparkles, Gauge, Shield, MapPin, MessageCircle, PhoneIncoming  } from "lucide-react";
+import {
+  Wrench,
+  Layers,
+  Zap,
+  Car,
+  Paintbrush,
+  Sparkles,
+  Gauge,
+  Shield,
+  MapPin,
+  MessageCircle,
+  PhoneIncoming,
+  ListCollapse,
+  ChartNoAxesCombined,
+} from "lucide-react";
 import Header from "@/components/Header";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,18 +24,24 @@ import { cn } from "@/lib/utils";
 const API_BASE = import.meta.env.VITE_API_BASE;
 
 type ServiceId =
-  | "Mechanical" | "Wrapping" | "Electrical" | "PPF"
-  | "Painting"   | "Ceramic"  | "Upholstery" | "Tinting";
+  | "Mechanical"
+  | "Wrapping"
+  | "Electrical"
+  | "PPF"
+  | "Painting"
+  | "Ceramic"
+  | "Upholstery"
+  | "Tinting";
 
 const SERVICES: { id: ServiceId; name: string; icon: any }[] = [
   { id: "Mechanical", name: "Mechanical", icon: Wrench },
-  { id: "Wrapping",   name: "Car Wrapping", icon: Layers },
+  { id: "Wrapping", name: "Car Wrapping", icon: Layers },
   { id: "Electrical", name: "Electrical", icon: Zap },
-  { id: "PPF",        name: "PPF", icon: Car },
-  { id: "Painting",   name: "Auto Painting", icon: Paintbrush },
-  { id: "Ceramic",    name: "Ceramic", icon: Sparkles },
+  { id: "PPF", name: "PPF", icon: Car },
+  { id: "Painting", name: "Auto Painting", icon: Paintbrush },
+  { id: "Ceramic", name: "Ceramic", icon: Sparkles },
   { id: "Upholstery", name: "Upholstery", icon: Gauge },
-  { id: "Tinting",    name: "Window Tinting", icon: Shield },
+  { id: "Tinting", name: "Window Tinting", icon: Shield },
 ];
 
 export default function Partner() {
@@ -29,7 +49,7 @@ export default function Partner() {
 
   const [garageName, setGarageName] = useState("");
   const [services, setServices] = useState<ServiceId[]>([]);
-  const [about, setAbout] = useState("");         // <-- now OPTIONAL
+  const [about, setAbout] = useState(""); // <-- now OPTIONAL
   const [location, setLocation] = useState("");
   const [whatsapp, setWhatsapp] = useState("");
   const [website, setWebsite] = useState("");
@@ -47,12 +67,16 @@ export default function Partner() {
   const [sending, setSending] = useState(false);
 
   const toggleService = (id: ServiceId) =>
-    setServices(s => s.includes(id) ? s.filter(x => x !== id) : [...s, id]);
+    setServices((s) =>
+      s.includes(id) ? s.filter((x) => x !== id) : [...s, id]
+    );
 
   // --- helper: first missing/invalid field only ---
   const firstMissing = () => {
-    if (!garageName.trim()) return { field: "Garage name", key: "name" as const };
-    if (services.length === 0) return { field: "Services", key: "services" as const };
+    if (!garageName.trim())
+      return { field: "Garage name", key: "name" as const };
+    if (services.length === 0)
+      return { field: "Services", key: "services" as const };
     if (!/^\+?[0-9\s-()]{7,}$/.test((whatsapp || "").trim()))
       return { field: "WhatsApp number", key: "whatsapp" as const };
     return null;
@@ -61,7 +85,11 @@ export default function Partner() {
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!API_BASE) {
-      toast({ title: "Not configured", description: "VITE_API_BASE is missing", variant: "destructive" });
+      toast({
+        title: "Not configured",
+        description: "VITE_API_BASE is missing",
+        variant: "destructive",
+      });
       return;
     }
 
@@ -72,7 +100,11 @@ export default function Partner() {
         miss.key === "whatsapp"
           ? "Please enter a valid WhatsApp number."
           : `Please provide ${miss.field.toLowerCase()}.`;
-      toast({ title: `Missing: ${miss.field}`, description: msg, variant: "destructive" });
+      toast({
+        title: `Missing: ${miss.field}`,
+        description: msg,
+        variant: "destructive",
+      });
       return;
     }
 
@@ -84,7 +116,7 @@ export default function Partner() {
         body: JSON.stringify({
           garageName,
           services,
-          about,      // optional; still sent if provided
+          about, // optional; still sent if provided
           location,
           whatsapp,
           website,
@@ -93,13 +125,26 @@ export default function Partner() {
         }),
       });
       const data = await res.json().catch(() => ({}));
-      if (!res.ok || data?.ok === false) throw new Error(data?.error || `HTTP ${res.status}`);
-      toast({ title: "Thanks! ✅", description: "We’ll review and contact you shortly." });
+      if (!res.ok || data?.ok === false)
+        throw new Error(data?.error || `HTTP ${res.status}`);
+      toast({
+        title: "Thanks! ✅",
+        description: "We’ll review and contact you shortly.",
+      });
       // reset minimal
-      setGarageName(""); setServices([]); setAbout(""); setLocation(""); setWhatsapp("");
-      setWebsite(""); setInstagram("");
+      setGarageName("");
+      setServices([]);
+      setAbout("");
+      setLocation("");
+      setWhatsapp("");
+      setWebsite("");
+      setInstagram("");
     } catch (err: any) {
-      toast({ title: "Submit failed", description: err?.message || "Please try again later.", variant: "destructive" });
+      toast({
+        title: "Submit failed",
+        description: err?.message || "Please try again later.",
+        variant: "destructive",
+      });
     } finally {
       setSending(false);
     }
@@ -117,7 +162,8 @@ export default function Partner() {
                 List your garage on YallaFinder
               </h1>
               <p className="text-base md:text-lg text-gray-700">
-                Join drivers near you looking for trusted services. No lock-ins. Grow with verified leads.
+                Join drivers near you looking for trusted services. No lock-ins.
+                Grow with verified leads.
               </p>
             </div>
 
@@ -127,17 +173,38 @@ export default function Partner() {
                   <MessageCircle className="h-5 w-5 text-white" />
                 </div>
                 <div>
-                  <h3 className="font-semibold text-blue-900">Direct WhatsApp Leads</h3>
-                  <p className="text-gray-600 text-sm">Customers contact you instantly.</p>
+                  <h3 className="font-semibold text-blue-900">
+                    Direct WhatsApp Leads
+                  </h3>
+                  <p className="text-gray-600 text-sm">
+                    Customers contact you instantly.
+                  </p>
                 </div>
               </div>
               <div className="flex items-center space-x-3 p-4 bg-white rounded-lg shadow-sm">
                 <div className="bg-blue-600 p-2 rounded-lg flex-shrink-0">
-                  <MapPin className="h-5 w-5 text-white" />
+                  <ListCollapse className="h-5 w-5 text-white" />
                 </div>
                 <div>
-                  <h3 className="font-semibold text-blue-900">Targeted by Location</h3>
-                  <p className="text-gray-600 text-sm">Show up for drivers nearby.</p>
+                  <h3 className="font-semibold text-blue-900">
+                    Indexed by Service
+                  </h3>
+                  <p className="text-gray-600 text-sm">
+                    Be found under the right categories and filters.
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center space-x-3 p-4 bg-white rounded-lg shadow-sm">
+                <div className="bg-blue-600 p-2 rounded-lg flex-shrink-0">
+                  <ChartNoAxesCombined className="h-5 w-5 text-white" />
+                </div>
+                <div>
+                  <h3 className="font-semibold text-blue-900">
+                    Performance Analytics
+                  </h3>
+                  <p className="text-gray-600 text-sm">
+                    Track profile views & clicks.
+                  </p>
                 </div>
               </div>
               <div className="flex items-center space-x-3 p-4 bg-white rounded-lg shadow-sm">
@@ -145,8 +212,12 @@ export default function Partner() {
                   <PhoneIncoming className="h-5 w-5 text-white" />
                 </div>
                 <div>
-                  <h3 className="font-semibold text-blue-900">Direct Calling</h3>
-                  <p className="text-gray-600 text-sm">Call option Available.</p>
+                  <h3 className="font-semibold text-blue-900">
+                    Direct Calling
+                  </h3>
+                  <p className="text-gray-600 text-sm">
+                    Call option Available.
+                  </p>
                 </div>
               </div>
             </div>
@@ -168,7 +239,7 @@ export default function Partner() {
                   placeholder="e.g., Numan's Auto Repair"
                   className="mt-1 h-10 md:h-11"
                   value={garageName}
-                  onChange={e => setGarageName(e.target.value)}
+                  onChange={(e) => setGarageName(e.target.value)}
                   aria-required
                 />
               </div>
@@ -176,10 +247,11 @@ export default function Partner() {
               {/* Services multi-select */}
               <div>
                 <Label>
-                  Services (pick all that apply) <span className="text-red-600">*</span>
+                  Services (pick all that apply){" "}
+                  <span className="text-red-600">*</span>
                 </Label>
                 <div className="mt-2 grid grid-cols-2 sm:grid-cols-3 gap-2">
-                  {SERVICES.map(s => {
+                  {SERVICES.map((s) => {
                     const Icon = s.icon;
                     const active = services.includes(s.id);
                     return (
@@ -191,7 +263,9 @@ export default function Partner() {
                         className={cn(
                           "flex items-center gap-2 rounded-md border px-3 py-2 text-sm",
                           "transition-colors",
-                          active ? "border-blue-600 bg-blue-50 text-blue-900" : "hover:bg-gray-50"
+                          active
+                            ? "border-blue-600 bg-blue-50 text-blue-900"
+                            : "hover:bg-gray-50"
                         )}
                       >
                         <Icon className="h-4 w-4" />
@@ -201,7 +275,9 @@ export default function Partner() {
                   })}
                 </div>
                 {services.length === 0 && (
-                  <p className="text-xs text-gray-500 mt-1">Select at least one.</p>
+                  <p className="text-xs text-gray-500 mt-1">
+                    Select at least one.
+                  </p>
                 )}
               </div>
 
@@ -212,9 +288,9 @@ export default function Partner() {
                   id="about"
                   className="w-full mt-1 px-3 py-2 md:px-4 md:py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
                   rows={2}
-                  placeholder="Tell drivers why they should pick you. E.g., German cars, hybrid diagnostics, same-day brakes, paint booth, etc."
+                  placeholder="Describe your specialties, key services, and extras (e.g. BMW/Mercedes, dealer-level diagnostics, same-day brakes)."
                   value={about}
-                  onChange={e => setAbout(e.target.value)}
+                  onChange={(e) => setAbout(e.target.value)}
                 />
               </div>
 
@@ -230,7 +306,7 @@ export default function Partner() {
                     placeholder="+971 50 123 4567"
                     className="mt-1 h-10 md:h-11"
                     value={whatsapp}
-                    onChange={e => setWhatsapp(e.target.value)}
+                    onChange={(e) => setWhatsapp(e.target.value)}
                     aria-required
                   />
                 </div>
@@ -241,7 +317,7 @@ export default function Partner() {
                     placeholder="@yourgarage"
                     className="mt-1 h-10 md:h-11"
                     value={instagram}
-                    onChange={e => setInstagram(e.target.value)}
+                    onChange={(e) => setInstagram(e.target.value)}
                   />
                 </div>
               </div>

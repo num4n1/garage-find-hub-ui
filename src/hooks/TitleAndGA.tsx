@@ -18,6 +18,7 @@ function getTitle(pathname: string) {
   if (pathname === "/about") return "YallaFinder | About";
   if (pathname === "/contact") return "YallaFinder | Contact";
   if (pathname === "/adminanalytics") return "YallaFinder | Admin Analytics";
+  if (pathname === "/partner") return "YallaFinder | Garage Partner";
   return "YallaFinder";
 }
 

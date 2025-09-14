@@ -26,6 +26,8 @@ export function getTitle(pathname: string): string {
       return "YallaFinder | Contact";
     case "/adminanalytics":
       return "YallaFinder | Admin Analytics";
+    case "/partner":
+      return "YallaFinder | Garage Partner";
     default:
       return "YallaFinder";
   }

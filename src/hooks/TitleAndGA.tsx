@@ -1,3 +1,4 @@
+// For Google analytics tracking
 import { useLocation } from "react-router-dom";
 import { useLayoutEffect, useEffect } from "react";
 

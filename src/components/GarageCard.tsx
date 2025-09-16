@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { MapPin, Star, MessageCircle, Phone, ScanSearch } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { db } from "@/lib/firebase";
+import { trackWhatsAppClick, trackCallClick } from "@/lib/analytics";
 import { addDoc, collection, serverTimestamp } from "firebase/firestore";
 
 interface Garage {
@@ -57,6 +58,8 @@ const GarageCard = ({ garage, service }: GarageCardProps) => {
       "_blank"
     );
 
+    trackWhatsAppClick({ service, garageId: garage.id });
+
     toast({
       title: "Opening WhatsApp",
       description: `Connecting you with ${garage.name}`,
@@ -66,6 +69,7 @@ const GarageCard = ({ garage, service }: GarageCardProps) => {
   };
 
   const handlePhoneContact = () => {
+    trackCallClick({ service, garageId: garage.id });
     window.open(`tel:${garage.whatsapp}`, "_self");
     logGarageClick("call");
   };

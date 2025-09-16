@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Mail, Shield } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { db } from "@/lib/firebase";
+import { trackWaitlistSignup } from "@/lib/analytics";
 import { setDoc, doc, serverTimestamp, getDoc } from "firebase/firestore";
 
 const LAUNCH_TS = Date.UTC(2025, 9, 1, 0, 0, 0); // Oct 1, 2025 (UTC)
@@ -64,6 +65,8 @@ export default function ComingSoon() {
         { merge: true }
       );
 
+      trackWaitlistSignup({ source: "coming_soon" });
+      
       setEmail("");
       toast({
         title: "Subscribed!",

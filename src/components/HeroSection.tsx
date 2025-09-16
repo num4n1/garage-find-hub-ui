@@ -1,12 +1,16 @@
 import { useEffect, useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { ScanSearch, Mail } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
-import { auth } from "@/lib/firebase";
 import { signInWithCustomToken } from "firebase/auth";
 import logoUrl from "@/assets/yallafinder_logo_transparent.svg";
+import { ScanSearch, Mail } from "lucide-react";
+
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import Header from "@/components/Header";
+
+import { useToast } from "@/hooks/use-toast";
+
+import { auth } from "@/lib/firebase";
+import { trackOtpLoginSuccess } from "@/lib/analytics";
 
 interface HeroSectionProps {
   onVerificationComplete: () => void;
@@ -94,6 +98,9 @@ const HeroSection = ({
         throw new Error(msg);
       }
       await signInWithCustomToken(auth, data.customToken);
+      
+      trackOtpLoginSuccess({ method: "otp" });
+
       toast({ title: "Verified", description: "You can now browse garages." });
       onVerificationComplete();
     } catch (e: any) {

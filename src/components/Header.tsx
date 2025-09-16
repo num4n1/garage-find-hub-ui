@@ -22,7 +22,7 @@ const Header = () => {
             <div className="bg-blue-600 p-2 rounded-lg">
               <div className="h-6 w-6 text-white">
                 <img
-                  src="/assets/yallafinder_logo_square.svg"
+                  src="/assets/yallafinder_icon_favicon_32.svg"
                   alt="YallaFinder"
                   className="h-full w-full object-contain block"
                   loading="eager"

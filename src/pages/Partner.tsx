@@ -168,54 +168,54 @@ export default function Partner() {
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-4 md:gap-6">
-              <div className="flex items-center space-x-3 p-4 bg-white rounded-lg shadow-sm">
-                <div className="bg-blue-600 p-2 rounded-lg flex-shrink-0">
-                  <MessageCircle className="h-5 w-5 text-white" />
+              <div className="flex items-center space-x-3 md:space-x-4 p-4 bg-white rounded-lg shadow-sm">
+                <div className="bg-blue-600 p-2 md:p-3 rounded-lg flex-shrink-0">
+                  <MessageCircle className="h-5 w-5 md:h-6 md:w-6 text-white" />
                 </div>
                 <div>
-                  <h3 className="font-semibold text-blue-900">
+                  <h3 className="font-semibold text-blue-900 text-sm md:text-base">
                     Direct WhatsApp Leads
                   </h3>
-                  <p className="text-gray-600 text-sm">
+                  <p className="text-gray-600 text-sm md:text-base">
                     Customers contact you instantly.
                   </p>
                 </div>
               </div>
-              <div className="flex items-center space-x-3 p-4 bg-white rounded-lg shadow-sm">
-                <div className="bg-blue-600 p-2 rounded-lg flex-shrink-0">
-                  <ListCollapse className="h-5 w-5 text-white" />
+              <div className="flex items-center space-x-3 md:space-x-4 p-4 bg-white rounded-lg shadow-sm">
+                <div className="bg-blue-600 p-2 md:p-3 rounded-lg flex-shrink-0">
+                  <ListCollapse className="h-5 w-5 md:h-6 md:w-6 text-white" />
                 </div>
                 <div>
-                  <h3 className="font-semibold text-blue-900">
+                  <h3 className="font-semibold text-blue-900 text-sm md:text-base">
                     Indexed by Service
                   </h3>
-                  <p className="text-gray-600 text-sm">
+                  <p className="text-gray-600 text-sm md:text-base">
                     Be found under the right categories and filters.
                   </p>
                 </div>
               </div>
-              <div className="flex items-center space-x-3 p-4 bg-white rounded-lg shadow-sm">
-                <div className="bg-blue-600 p-2 rounded-lg flex-shrink-0">
-                  <ChartNoAxesCombined className="h-5 w-5 text-white" />
+              <div className="flex items-center space-x-3 md:space-x-4 p-4 bg-white rounded-lg shadow-sm">
+                <div className="bg-blue-600 p-2 md:p-3 rounded-lg flex-shrink-0">
+                  <ChartNoAxesCombined className="h-5 w-5 md:h-6 md:w-6 text-white" />
                 </div>
                 <div>
-                  <h3 className="font-semibold text-blue-900">
+                  <h3 className="font-semibold text-blue-900 text-sm md:text-base">
                     Performance Analytics
                   </h3>
-                  <p className="text-gray-600 text-sm">
+                  <p className="text-gray-600 text-sm md:text-base">
                     Track profile views & clicks.
                   </p>
                 </div>
               </div>
-              <div className="flex items-center space-x-3 p-4 bg-white rounded-lg shadow-sm">
-                <div className="bg-blue-600 p-2 rounded-lg flex-shrink-0">
-                  <PhoneIncoming className="h-5 w-5 text-white" />
+              <div className="flex items-center space-x-3 md:space-x-4 p-4 bg-white rounded-lg shadow-sm">
+                <div className="bg-blue-600 p-2 md:p-3 rounded-lg flex-shrink-0">
+                  <PhoneIncoming className="h-5 w-5 md:h-6 md:w-6 text-white" />
                 </div>
                 <div>
-                  <h3 className="font-semibold text-blue-900">
+                  <h3 className="font-semibold text-blue-900 text-sm md:text-base">
                     Direct Calling
                   </h3>
-                  <p className="text-gray-600 text-sm">
+                  <p className="text-gray-600 text-sm md:text-base">
                     Call option Available.
                   </p>
                 </div>
@@ -236,7 +236,7 @@ export default function Partner() {
                 </Label>
                 <Input
                   id="gname"
-                  placeholder="e.g., Numan's Auto Repair"
+                  placeholder="e.g. Numan's Auto Repair"
                   className="mt-1 h-10 md:h-11"
                   value={garageName}
                   onChange={(e) => setGarageName(e.target.value)}
@@ -286,9 +286,9 @@ export default function Partner() {
                 <Label htmlFor="about">About your garage (optional)</Label>
                 <textarea
                   id="about"
-                  className="w-full mt-1 px-3 py-2 md:px-4 md:py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+                  className="w-full mt-1 h-10 md:h-11 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none text-base placeholder:text-base"
                   rows={2}
-                  placeholder="Describe your specialties, key services, and extras (e.g. BMW/Mercedes, dealer-level diagnostics, same-day brakes)."
+                  placeholder="e.g. BMW/Mercedes, dealer-level diagnostics, same-day brakes"
                   value={about}
                   onChange={(e) => setAbout(e.target.value)}
                 />

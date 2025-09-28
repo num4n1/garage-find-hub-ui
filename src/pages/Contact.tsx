@@ -21,7 +21,7 @@ const Contact = () => {
   const [sending, setSending] = useState(false);
 
   // Build WhatsApp link using the current `message` state
-  const WA_TEXT  = encodeURIComponent("Support message from YallaFinder.com\nSubject: YallaFinder Support\n");
+  const WA_TEXT  = encodeURIComponent("Support message from YallaFinder.com\n\nSubject: YallaFinder Support\n\n");
   const waHref = `https://wa.me/${WA_PHONE}?text=${WA_TEXT}`;
 
   const validate = () => {

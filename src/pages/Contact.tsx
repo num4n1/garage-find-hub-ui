@@ -5,8 +5,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
+import { FaWhatsapp } from "react-icons/fa";
 
 const API_BASE = import.meta.env.VITE_API_BASE; // e.g. https://<region>-<proj>.cloudfunctions.net
+
+const WA_PHONE = "971509834498"; // E.164 without '+'
 
 const Contact = () => {
   const { toast } = useToast();
@@ -16,6 +19,10 @@ const Contact = () => {
   const [message, setMessage] = useState("");
   const [bot, setBot] = useState(""); // honeypot
   const [sending, setSending] = useState(false);
+
+  // Build WhatsApp link using the current `message` state
+  const WA_TEXT  = encodeURIComponent("Support message from YallaFinder.com\n\nSubject: YallaFinder Support\n\n");
+  const waHref = `https://wa.me/${WA_PHONE}?text=${WA_TEXT}`;
 
   const validate = () => {
     if (bot) return false;
@@ -118,19 +125,35 @@ const Contact = () => {
                 </div>
               </div>
 
-              <div className="flex items-center space-x-3 md:space-x-4 p-4 bg-white rounded-lg shadow-sm">
-                <div className="bg-blue-600 p-2 md:p-3 rounded-lg flex-shrink-0">
-                  <MessageCircle className="h-5 w-5 md:h-6 md:w-6 text-white" />
+              <a
+                href={waHref}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Chat on WhatsApp — Quick response guaranteed"
+                className="block"
+              >
+                <div
+                  className="group flex items-center space-x-3 md:space-x-4 p-4 bg-white rounded-lg shadow-sm 
+                             ring-1 ring-gray-200 hover:ring-[#25D366] focus:ring-[#25D366] 
+                             transition-colors cursor-pointer"
+                >
+                  <div className="rounded-lg flex-shrink-0 p-2 md:p-3 bg-[#25D366]">
+                    <FaWhatsapp className="h-5 w-5 md:h-6 md:w-6 text-white" aria-hidden="true" />
+                  </div>
+
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2">
+                      <h3 className="font-semibold text-blue-900 text-sm md:text-base">WhatsApp Support</h3>
+                      <span className="inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[11px] md:text-xs
+                                       border-[#25D366]/40 bg-[#25D366]/10 text-[#1a9a53]">
+                        <FaWhatsapp className="h-3 w-3" />
+                        WhatsApp
+                      </span>
+                    </div>
+                    <p className="text-gray-600 text-sm md:text-base">Quick response guaranteed</p>
+                  </div>
                 </div>
-                <div>
-                  <h3 className="font-semibold text-blue-900 text-sm md:text-base">
-                    WhatsApp
-                  </h3>
-                  <p className="text-gray-600 text-sm md:text-base">
-                    Quick response guaranteed
-                  </p>
-                </div>
-              </div>
+              </a>
 
               <div className="flex items-center space-x-3 md:space-x-4 p-4 bg-white rounded-lg shadow-sm">
                 <div className="bg-blue-600 p-2 md:p-3 rounded-lg flex-shrink-0">

@@ -23,7 +23,7 @@ import ComingSoon from "@/components/ComingSoon";
 const queryClient = new QueryClient();
 
 // Launch date (UTC): Oct 10, 2025 00:00:00
-const LAUNCH_TS = Date.UTC(2025, 10, 1, 0, 0, 0);
+const LAUNCH_TS = Date.UTC(2025, 10, 15, 0, 0, 0);
 const BYPASS_KEY = "yf_admin_bypass";
 
 function shouldShowComingSoon() {

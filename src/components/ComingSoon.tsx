@@ -7,7 +7,7 @@ import { db } from "@/lib/firebase";
 import { trackWaitlistSignup } from "@/lib/analytics";
 import { setDoc, doc, serverTimestamp, getDoc } from "firebase/firestore";
 
-const LAUNCH_TS = Date.UTC(2025, 10, 1, 0, 0, 0); // Oct 1, 2025 (UTC)
+const LAUNCH_TS = Date.UTC(2025, 10, 15, 0, 0, 0); // Oct 1, 2025 (UTC)
 const BYPASS_KEY = "yf_admin_bypass";
 const API_BASE = import.meta.env.VITE_API_BASE; // e.g. https://...cloudfunctions.net/api
 
@@ -235,7 +235,7 @@ export default function ComingSoon() {
 
           <div className="mt-12 text-blue-200/80 text-xs">
             Launching on{" "}
-            <span className="font-semibold">November 1st, 2025</span>
+            <span className="font-semibold">November 15th, 2025</span>
           </div>
         </div>
       </main>

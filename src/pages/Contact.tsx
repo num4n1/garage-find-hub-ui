@@ -9,7 +9,7 @@ import { FaWhatsapp } from "react-icons/fa";
 
 const API_BASE = import.meta.env.VITE_API_BASE; // e.g. https://<region>-<proj>.cloudfunctions.net
 
-const WA_PHONE = "971509834498"; // E.164 without '+'
+const WA_PHONE = "971507199103"; // E.164 without '+'
 
 const Contact = () => {
   const { toast } = useToast();

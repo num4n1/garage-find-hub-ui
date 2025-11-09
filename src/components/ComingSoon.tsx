@@ -7,7 +7,7 @@ import { db } from "@/lib/firebase";
 import { trackWaitlistSignup } from "@/lib/analytics";
 import { setDoc, doc, serverTimestamp, getDoc } from "firebase/firestore";
 
-const LAUNCH_TS = Date.UTC(2025, 10, 15, 0, 0, 0); // Oct 1, 2025 (UTC)
+const LAUNCH_TS = Date.UTC(2026, 0, 1, -4, 0, 0); // Jan 1, 2026 (UTC)
 const BYPASS_KEY = "yf_admin_bypass";
 const API_BASE = import.meta.env.VITE_API_BASE; // e.g. https://...cloudfunctions.net/api
 

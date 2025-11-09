@@ -235,7 +235,7 @@ export default function ComingSoon() {
 
           <div className="mt-12 text-blue-200/80 text-xs">
             Launching on{" "}
-            <span className="font-semibold">November 15th, 2025</span>
+            <span className="font-semibold">January 1st, 2026</span>
           </div>
         </div>
       </main>
